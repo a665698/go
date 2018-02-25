@@ -125,7 +125,7 @@ func (n *novel) parseHtml() {
 		fmt.Println("error :", n.url, ": 转json失败->", err)
 	}
 	ioutil.WriteFile(fileName+".txt", j, 0666)
-	os.Mkdir(fileName, 0666)
+	os.Mkdir(fileName, 0755)
 	for contentNum > 0  {
 		<-channel
 		contentNum --
