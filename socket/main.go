@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"errors"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -25,6 +26,10 @@ func main() {
 	http.HandleFunc("/ws", handel)
 	go handelChannel()
 	http.ListenAndServe(":3000", nil)
+}
+
+func te() (int ,error) {
+	return 12, errors.New("err")
 }
 
 func handel(w http.ResponseWriter, r *http.Request) {
