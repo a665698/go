@@ -1,7 +1,6 @@
 package myhttp
 
 import (
-	"encoding/xml"
 	"strings"
 	"sort"
 	"crypto/sha1"
@@ -49,11 +48,14 @@ func WxHandle(c *Context) {
 		http.Error(c.response, "error", http.StatusBadRequest)
 		return
 	}
-	wxResult := &wx.Response{}
-	wxResult.Body = body
-	xml.Unmarshal(body, wxResult)
-	result := wxResult.TypeHandle()
-	c.response.Write(result)
+	c.response.Write(wx.Handle(body))
+
+	//wxResult := &wx.Response{}
+	//wxResult.Body = body
+	//xml.Unmarshal(body, wxResult)
+	//result := wxResult.TypeHandle()
+	//c.response.Write(result)
+
 	//response,err := xml.MarshalIndent(wxResult, "", "")
 	//if err != nil {
 	//	http.Error(c.response, "error", http.StatusBadRequest)

@@ -6,7 +6,7 @@ import (
 )
 
 type MenuMessage struct {
-	BaseResponse
+	//BaseResponse
 	Event string
 	EventKey string
 }
@@ -44,6 +44,6 @@ func MenuCreate() {
 	post(CreateMenu + "?access_token=" + accessToken.Token, string(result))
 }
 
-func (m *MenuMessage) Handle() {
-
-}
+//func (m *MenuMessage) Handle() []byte {
+//
+//}

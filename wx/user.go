@@ -25,7 +25,7 @@ type User struct {
 }
 
 // 获取用户信息
-func (wx *Response) GetUserInfo() {
+//func (wx *Response) GetUserInfo() {
 	//user := &User{}
 	//if false == get(GetUserInfo + "?access_token=" + accessToken.Token + "&openid=" + wx.FromUserName + "&lang=zh_CN", user) {
 	//	wx.Content = "获取用户信息失败"
@@ -33,5 +33,5 @@ func (wx *Response) GetUserInfo() {
 	//	wx.Content = "hello " + user.Nickname
 	//}
 	//wx.BaseResponse()
-}
+//}
 

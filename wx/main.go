@@ -1,13 +1,13 @@
 package wx
 
 import (
-	"time"
 	"net/http"
-	"encoding/xml"
 	"io/ioutil"
 	"encoding/json"
 	"fmt"
 	"strings"
+	"wx/message"
+	"encoding/xml"
 )
 
 const (
@@ -18,24 +18,10 @@ const (
 	Token = "VUe8o5z3H40FgEZNEs58sAs9k0XYjsfA"
 )
 
-type XmlHandle interface {
-	Handle()
-	response() []byte
-}
-
-type Response struct {
-	XMLName xml.Name `xml:"xml"`
-	MsgType string
-	Event string
-	Body []byte `xml:"-"`
-}
-
-type BaseResponse struct {
-	XMLName xml.Name `xml:"xml"`
-	ToUserName string
-	FromUserName string
-	CreateTime time.Duration
-	MsgType string
+func Handle(body []byte) []byte {
+	w := &message.Message{}
+	xml.Unmarshal(body, w)
+	return w.TypeHandle()
 }
 
 // 发送GET请求获取数据
@@ -89,57 +75,4 @@ func post(url, postInfo string) bool {
 			return false
 		}
 	}
-}
-
-func (r *BaseResponse) Handle()  {
-
-}
-
-// 返回xml文本
-func (r *BaseResponse) response() []byte {
-	textMessage := TextMessage{}
-	textMessage.MsgType = "text"
-	textMessage.FromUserName, textMessage.ToUserName = r.ToUserName, r.FromUserName
-	textMessage.CreateTime = time.Duration(time.Now().Unix())
-	textMessage.Content = "处理错误"
-	result, _ := xml.MarshalIndent(textMessage, "  ", "    ")
-	return result
-}
-
-// 判断消息类型
-func (wx *Response) TypeHandle() []byte {
-	fmt.Println("MsgType:", wx.MsgType)
-	var handle XmlHandle
-	switch wx.MsgType {
-	case "text":
-		handle = &TextMessage{}
-	case "image":
-		handle = &ImageMessage{}
-	case "voice":
-		handle = &VoiceMessage{}
-	case "video":
-		handle = &VideoMessage{}
-	case "shortvideo":
-		handle = &VoiceMessage{}
-	case "location":
-		handle = &LocationMessage{}
-	case "link":
-		handle = &LinkMessage{}
-	case "event":
-		//wx.EventTypeHandle()
-		handle = wx.EventTypeHandle()
-	}
-	xml.Unmarshal(wx.Body, handle)
-	handle.Handle()
-	return handle.response()
-}
-
-// 判断事件类型
-func (wx *Response) EventTypeHandle() XmlHandle {
-	fmt.Println("Event:", wx.Event)
-	switch wx.Event {
-	case "CLICK":
-		return &MenuMessage{}
-	}
-	return nil
 }
