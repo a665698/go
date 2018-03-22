@@ -1,24 +1,44 @@
-package wx
+package menu
 
-//import (
-//	"encoding/json"
-//	"fmt"
-//)
-//
-//type MenuMessage struct {
-//	//BaseResponse
-//	Event string
-//	EventKey string
-//}
-//
-//type Menu struct {
-//	Type string `json:"type"`
-//	Name string	`json:"name"`
-//	Key string `json:"key"`
-//}
-//
+import (
+	"wx/config"
+)
+
+
+type Button struct {
+	Button *[]Button `json:"button,omitempty"`
+	SubButton *[]Button `json:"sub_button,omitempty"`
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+	Key string `json:"key,omitempty"`
+	Url string `json:"url,omitempty"`
+	MediaId string `json:"media_id,omitempty"`
+}
+
+
+func (m *Button) setClickButton(name, key string) {
+	m.Button = nil
+	m.SubButton = nil
+	m.Name = name
+	m.Type = config.MenuClick
+	m.Key = key
+	m.Url = ""
+	m.MediaId = ""
+}
+
+func (m *Button) setViewButton(name, key string) {
+	m.Button = nil
+	m.SubButton = nil
+	m.Name = name
+	m.Type = config.MenuClick
+	m.Key = key
+	m.Url = ""
+	m.MediaId = ""
+}
+
+
 //// 创建自定义菜单
-//func MenuCreate() {
+//func Create() {
 //	var button1 Menu
 //	button1.Type = "click"
 //	button1.Name = "测试按钮1"
@@ -42,8 +62,4 @@ package wx
 //		fmt.Println("menu json make error")
 //	}
 //	post(CreateMenu + "?access_token=" + accessToken.Token, string(result))
-//}
-
-//func (m *MenuMessage) Handle() []byte {
-//
 //}

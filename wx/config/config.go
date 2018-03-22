@@ -36,3 +36,17 @@ const (
 	EventView = "VIEW"
 )
 
+// 菜单
+const (
+	MenuClick = "click"
+	MenuView = "view"
+	MenuScanCodePush = "scancode_push"
+	MenuScanCodeWait = "scancode_waitmsg"
+	MenuPicSysPhoto = "pic_sysphoto"
+	MenuPicPhotoOrAlbum = "pic_photo_or_album"
+	MenuPicAlbum = "pic_weixin"
+	MenuLocation = "location_select"
+	MenuMedia = "media_id"
+	MenuMediaView = "view_limited"
+)
+
