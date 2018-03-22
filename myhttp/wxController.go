@@ -2,9 +2,6 @@ package myhttp
 
 import (
 	"strings"
-	"sort"
-	"crypto/sha1"
-	"fmt"
 	"net/http"
 	"io/ioutil"
 	"wx"
@@ -20,7 +17,7 @@ func WxBaseFunc(c *Context) {
 	timestamp := strings.Join(c.request.Form["timestamp"], "")
 	nonce := strings.Join(c.request.Form["nonce"], "")
 	signature := strings.Join(c.request.Form["signature"], "")
-	if signature == makeSignature(timestamp, nonce) {
+	if signature == wx.MakeSignature(timestamp, nonce) {
 		if c.request.Method == http.MethodGet {
 			schostr := strings.Join(c.request.Form["echostr"], "")
 			c.response.Write([]byte(schostr))
@@ -33,15 +30,6 @@ func WxBaseFunc(c *Context) {
 	}
 }
 
-// 生成签名用来判断签名是否正确
-func makeSignature(timestamp, nonce string) string {
-	str := []string{timestamp, nonce, wx.Token}
-	sort.Strings(str)
-	s := sha1.New()
-	s.Write([]byte(strings.Join(str, "")))
-	return fmt.Sprintf("%x", s.Sum(nil))
-}
-
 func WxHandle(c *Context) {
 	body, err := ioutil.ReadAll(c.request.Body)
 	if err != nil {
@@ -49,22 +37,6 @@ func WxHandle(c *Context) {
 		return
 	}
 	c.response.Write(wx.Handle(body))
-
-	//wxResult := &wx.Response{}
-	//wxResult.Body = body
-	//xml.Unmarshal(body, wxResult)
-	//result := wxResult.TypeHandle()
-	//c.response.Write(result)
-
-	//response,err := xml.MarshalIndent(wxResult, "", "")
-	//if err != nil {
-	//	http.Error(c.response, "error", http.StatusBadRequest)
-	//	return
-	//}
-	// 获取用户信息
-	//wxResult.GetUserInfo()
-	//wx.MenuCreate()
-	//c.response.Write(wxResult.BaseResponse())
 }
 
 func Index(c *Context) {

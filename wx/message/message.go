@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"time"
 	"fmt"
+	"wx/config"
 )
 
 type HandleFun interface {
@@ -36,58 +37,61 @@ type Message struct {
 	Title string
 	Description string
 	Url string
+
+	// 事件
+	Event string
+	EventKey string // 事件KEY值
+	Ticket string // 二维码的ticket，可用来换取二维码图片
+	Latitude float64 // 地理位置纬度
+	Longitude float64 // 地理位置经度
+	Precision float64 // 地理位置精度
 }
 
-func (m *BaseMessage) BaseHandle(w *Message) {
-	m.FromUserName ,m.ToUserName = w.ToUserName, w.FromUserName
-	m.MsgType = w.MsgType
-	m.CreateTime = time.Duration(time.Now().Unix())
-}
-
-func (m *BaseMessage) Handle(*Message) {
-	m.MsgType = "text"
+func (m *Message) BaseHandle(b *BaseMessage) {
+	b.FromUserName ,b.ToUserName = m.ToUserName, m.FromUserName
+	b.CreateTime = time.Duration(time.Now().Unix())
 }
 
 // 判断消息类型
 func (m *Message) TypeHandle() []byte {
 	fmt.Println("MsgType:", m.MsgType)
-	var handle HandleFun
+	var i interface{}
 	switch m.MsgType {
-	case "text":
-		handle = &TextMessage{}
-	case "image":
-		handle = &ImageMessage{}
-	//case "voice":
-	//	handle = &VoiceMessage{}
-	//case "video":
-	//	handle = &VideoMessage{}
-	//case "shortvideo":
-	//	handle = &VoiceMessage{}
-	//case "location":
-	//	handle = &LocationMessage{}
-	//case "link":
-	//	handle = &LinkMessage{}
-	//case "event":
-	//	//wx.EventTypeHandle()
-	//	handle = wx.EventTypeHandle()
+	case config.MsgTypeText:
+		i = m.NewTextMessage("你输入的是：" + m.Content)
+	case config.MsgTypeImage:
+		i = m.NewImageMessage(m.MediaId)
+	case config.MsgTypeVoice:
+		i = m.NewTextMessage("收到语音消息")
+	case config.MsgTypeVideo, config.MsgTypeShortVideo:
+		i = m.NewTextMessage("收到视频消息")
+	case config.MsgTypeLocation:
+		i = m.NewTextMessage("收到地图消息")
+	case config.MsgTypeLink:
+		i = m.NewTextMessage("收到链接消息")
+	case config.MsgTypeEvent:
+		i = m.EventTypeHandle()
 	default:
+		i = nil
+	}
+	if i == nil {
 		return []byte("")
 	}
-	handle.BaseHandle(m)
-	handle.Handle(m)
-	body, _ := xml.Marshal(handle)
+	body, _ := xml.Marshal(i)
 	return body
-	//return []byte("fdsa")
-	//xml.Unmarshal(wx.Body, handle)
 }
 
-//// 判断事件类型
-//func (m *Message) EventTypeHandle() XmlHandle {
-//	fmt.Println("Event:", wx.Event)
-//	switch wx.Event {
-//	case "CLICK":
-//		return &MenuMessage{}
-//	}
-//	return &BaseResponse{}
-//}
+// 判断事件类型
+func (m *Message) EventTypeHandle() interface{} {
+	fmt.Println("Event:", m.Event)
+	switch m.Event {
+	case config.EventSubscribe:
+		return m.Subscribe()
+	case config.EventUnSubscribe:
+		return m.UnSubscribe()
+	case config.EventLocation:
+		return m.Location()
+	}
+	return nil
+}
 

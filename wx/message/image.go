@@ -1,5 +1,9 @@
 package message
 
+import (
+	"wx/config"
+)
+
 type ImageMessage struct {
 	BaseMessage
 	Image struct{
@@ -7,6 +11,10 @@ type ImageMessage struct {
 	}
 }
 
-func (m *ImageMessage) Handle (w *Message) {
-	m.Image.MediaId = w.MediaId
+func (m *Message) NewImageMessage (mediaId string) *ImageMessage {
+	i := &ImageMessage{}
+	i.Image.MediaId = mediaId
+	i.MsgType = config.MsgTypeImage
+	m.BaseHandle(&i.BaseMessage)
+	return i
 }
