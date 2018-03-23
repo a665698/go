@@ -3,12 +3,12 @@ package wx
 import (
 	"wx/message"
 	"encoding/xml"
-	"wx/token"
 	"wx/config"
 	"crypto/sha1"
 	"strings"
 	"fmt"
 	"sort"
+	"wx/token"
 )
 
 func Handle(body []byte) []byte {

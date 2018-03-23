@@ -1,7 +1,10 @@
 package log
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func MessageLog(content string)  {
-	fmt.Println(content)
+	fmt.Println(fmt.Sprint(time.Now(), content))
 }

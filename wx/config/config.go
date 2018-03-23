@@ -9,9 +9,10 @@ const (
 )
 
 const (
-	TokenUrl = Api + "token?"
-	UserInfoUrl = Api + "user/info?"
-	CreateMenu = Api + "menu/create"
+	TokenUrl = Api + "token?" // 获取accessToken
+	UserInfoUrl = Api + "user/info?" // 获取用户信息
+	MenuCreateUrl = Api + "menu/create?" // 新建自定义菜单
+	MenuDeleteUrl = Api + "menu/delete?" // 删除自定义菜单
 )
 
 const (
@@ -30,10 +31,15 @@ const (
 	// 事件
 	EventSubscribe = "subscribe" // 订阅
 	EventUnSubscribe = "unsubscribe" // 取消订阅
-	EventScan = "SCAN"
-	EventLocation = "LOCATION"
-	EventClick = "CLICK"
-	EventView = "VIEW"
+	EventLocation = "LOCATION" // 发送地图
+	EventClick = "CLICK" // 点击
+	EventView = "VIEW" // 跳转
+	EventScanCodePush = "scancode_push" // 扫码推
+	EventScanCodeWait = "scancode_waitmsg"
+	EventPicSysPhoto = "pic_sysphoto"
+	EventPicPhotoOrAlbum = "pic_photo_or_album"
+	EventPicAlbum = "pic_weixin"
+	EventLocationSelect = "location_select"
 )
 
 // 菜单
@@ -48,5 +54,22 @@ const (
 	MenuLocation = "location_select"
 	MenuMedia = "media_id"
 	MenuMediaView = "view_limited"
+
+	MenuClickButtonName = "点击按钮"
+	MenuClickButtonKey = "clickButton"
+	MenuViewButtonName = "跳转按钮"
+	MenuViewButtonUrl = "http://www.zsuch.com"
+	MenuLocationButtonName = "发送位置"
+	MenuLocationButtonKey = "locationButton"
+	MenuScanCodePushButtonName = "扫码推"
+	MenuScanCodePushButtonKey = "scanCodePushButton"
+	MenuScanCodeWaitButtonName = "扫码带提示"
+	MenuScanCodeWaitButtonKey = "scanCodeWaitButton"
+	MenuPicSysPhotoButtonName = "系统拍照发图"
+	MenuPicSysPhotoButtonKey = "picSysPhotoButton"
+	MenuPicPhotoOrAlbumButtonName = "拍照或者相册发图"
+	MenuPicPhotoOrAlbumButtonKey = "PicPhotoOrAlbumButton"
+	MenuPicAlbumButtonName = "相册发图"
+	MenuPicAlbumButtonKey = "albumButton"
 )
 

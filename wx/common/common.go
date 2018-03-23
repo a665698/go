@@ -2,7 +2,6 @@ package common
 
 import (
 	"net/http"
-	"fmt"
 	"io/ioutil"
 	"encoding/json"
 	"strings"
@@ -34,6 +33,10 @@ type GetResponse struct {
 	QrScene int `json:"qr_scene"`
 	QrSceneStr string `json:"qr_scene_str"`
 
+	Code
+}
+
+type Code struct {
 	// 错误
 	ErrCode int `json:"errcode"`
 	ErrMsg string `json:"errmsg"`
@@ -60,32 +63,21 @@ func Get(url string) (*GetResponse, error) {
 	return s, nil
 }
 
-func Post(url, postInfo string) bool {
-	result, err := http.Post(url, "application/json; encoding=utf-8", strings.NewReader(postInfo))
+func Post(url string, postInfo []byte) error {
+	result, err := http.Post(url, "application/json; encoding=utf-8", strings.NewReader(string(postInfo)))
 	if err != nil {
-		fmt.Println(err)
-		return false
+		return err
 	}
 	body, err := ioutil.ReadAll(result.Body)
 	if err != nil {
-		fmt.Println(err)
-		return false
+		return err
 	}
-	var r map[string]interface{}
+	r := Code{}
 	if err = json.Unmarshal(body, &r); err != nil {
-		fmt.Println(err)
-		return false
+		return err
 	}
-	if errCode, ok := r["errcode"]; !ok {
-		fmt.Println("errcode not fount")
-		return false
-	} else {
-		code := int(errCode.(float64))
-		if code == 0 {
-			return true
-		} else {
-			//fmt.Println(GetError(code))
-			return false
-		}
+	if r.ErrCode != 0 {
+		return errors.New("错误码：" + string(r.ErrCode) + ",错误信息：" + r.ErrMsg)
 	}
+	return nil
 }
