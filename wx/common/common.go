@@ -7,6 +7,12 @@ import (
 	"strings"
 	"time"
 	"errors"
+	"bytes"
+	"mime/multipart"
+	"os"
+	"io"
+	"strconv"
+	"fmt"
 )
 
 type GetResponse struct {
@@ -58,26 +64,66 @@ func Get(url string) (*GetResponse, error) {
 		return nil, err
 	}
 	if s.ErrCode != 0 {
-		return nil,errors.New("错误码：" + string(s.ErrCode) + ",错误信息：" + s.ErrMsg)
+		return nil,errors.New("错误码：" + strconv.Itoa(s.ErrCode) + ",错误信息：" + s.ErrMsg)
 	}
 	return s, nil
 }
 
+// 发送post请求
 func Post(url string, postInfo []byte) error {
 	result, err := http.Post(url, "application/json; encoding=utf-8", strings.NewReader(string(postInfo)))
 	if err != nil {
 		return err
 	}
-	body, err := ioutil.ReadAll(result.Body)
+	return postReturnValid(result.Body)
+}
+
+// 上传文件
+func UploadFile(url, fileName string) error {
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	fw, err := w.CreateFormFile("media", fileName)
+	if err != nil {
+		return err
+	}
+	f, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := io.Copy(fw, f); err != nil {
+		return err
+	}
+	fmt.Println(url)
+	req, err := http.NewRequest("post", url, &b)
+	if err != nil {
+		return err
+	}
+	fmt.Println(b)
+	fmt.Println(w.FormDataContentType())
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	h := &http.Client{}
+	res, err := h.Do(req)
+	if err != nil {
+		return err
+	}
+	return postReturnValid(res.Body)
+}
+
+// post请求结果检验
+func postReturnValid(body io.ReadCloser) error {
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
 	}
 	r := Code{}
-	if err = json.Unmarshal(body, &r); err != nil {
+	if err = json.Unmarshal(b, &r); err != nil {
 		return err
 	}
 	if r.ErrCode != 0 {
-		return errors.New("错误码：" + string(r.ErrCode) + ",错误信息：" + r.ErrMsg)
+		return errors.New("错误码：" + strconv.Itoa(r.ErrCode) + ",错误信息：" + r.ErrMsg)
 	}
 	return nil
 }
+
+

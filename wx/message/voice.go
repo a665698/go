@@ -15,6 +15,6 @@ type VoiceMessage struct {
 func (m *Message) NewVoiceMessage () *VoiceMessage {
 	v := &VoiceMessage{}
 	v.Voice.MediaId = m.MediaId
-	v.MsgType = config.MsgTypeVoice
+	v.MsgType = config.MediaTypeVoice
 	return v
 }

@@ -19,6 +19,6 @@ func (m *Message) NewVideoMessage () *VideoMessage {
 	v.Video.MediaId = m.MediaId
 	v.Video.Title = "标题"
 	v.Video.Description = "描述"
-	v.MsgType = config.MsgTypeVideo
+	v.MsgType = config.MediaTypeVideo
 	return v
 }

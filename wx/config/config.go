@@ -4,7 +4,8 @@ const (
 	AppID = "wxb4f36cf1b0708cba"
 	AppSecret = "7e4e29a4414758b3bb753c3a63f3bff8"
 	TokenErrorNumber = 5
-	Api = "https://api.weixin.qq.com/cgi-bin/"
+	Domain = "https://api.weixin.qq.com/"
+	Api = Domain + "cgi-bin/"
 	Token = "VUe8o5z3H40FgEZNEs58sAs9k0XYjsfA"
 )
 
@@ -16,11 +17,15 @@ const (
 )
 
 const (
+	MediaTypeImage = "image"
+	MediaTypeVoice = "voice"
+	MediaTypeVideo = "video"
+	MediaTypeThumb = "thumb"
+)
+
+const (
 	// 消息
 	MsgTypeText = "text"
-	MsgTypeImage = "image"
-	MsgTypeVoice = "voice"
-	MsgTypeVideo = "video"
 	MsgTypeMusic = "music"
 	MsgTypeNews = "news"
 	MsgTypeShortVideo = "shortvideo"
@@ -71,5 +76,16 @@ const (
 	MenuPicPhotoOrAlbumButtonKey = "PicPhotoOrAlbumButton"
 	MenuPicAlbumButtonName = "相册发图"
 	MenuPicAlbumButtonKey = "albumButton"
+)
+
+const (
+	CustomApi = Domain + "customservice/kfaccount/"
+	CustomAdd = CustomApi + "add?"
+	CustomUpdate = CustomApi + "update?"
+	CustomDel = CustomApi + "del?"
+)
+
+const (
+	MediaTmpAdd = Api + "media/upload?access_token=%s&type=%s"
 )
 

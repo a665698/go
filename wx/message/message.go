@@ -84,11 +84,11 @@ func (m *Message) TypeHandle() []byte {
 	switch m.MsgType {
 	case config.MsgTypeText:
 		i = m.TextMessageHandle()
-	case config.MsgTypeImage:
+	case config.MediaTypeImage:
 		i = m.NewImageMessage(m.MediaId)
-	case config.MsgTypeVoice:
+	case config.MediaTypeVoice:
 		i = m.NewTextMessage("收到语音消息")
-	case config.MsgTypeVideo, config.MsgTypeShortVideo:
+	case config.MediaTypeVideo, config.MsgTypeShortVideo:
 		i = m.NewTextMessage("收到视频消息")
 	case config.MsgTypeLocation:
 		i = m.NewTextMessage("收到地图消息")
@@ -100,7 +100,7 @@ func (m *Message) TypeHandle() []byte {
 		i = nil
 	}
 	if i == nil {
-		return []byte("")
+		return []byte("success")
 	}
 	body, _ := xml.Marshal(i)
 	return body

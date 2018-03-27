@@ -14,7 +14,7 @@ type ImageMessage struct {
 func (m *Message) NewImageMessage (mediaId string) *ImageMessage {
 	i := &ImageMessage{}
 	i.Image.MediaId = mediaId
-	i.MsgType = config.MsgTypeImage
+	i.MsgType = config.MediaTypeImage
 	m.BaseHandle(&i.BaseMessage)
 	return i
 }
