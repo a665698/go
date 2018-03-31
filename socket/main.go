@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"errors"
+	"time"
+	"strconv"
 )
 
 var upgrader = websocket.Upgrader{}
+
+const TokenName = "CzcyAutoLogin"
 
 type client struct {
 	conn *websocket.Conn
@@ -21,19 +24,25 @@ var addMessage chan []byte
 
 func main() {
 	fmt.Println("start")
-	fs := http.FileServer(http.Dir("public"))
-	http.Handle("/", fs)
+	//fs := http.FileServer(http.Dir("public"))
+	//http.Handle("/", fs)
+	http.HandleFunc("/", FileHandle)
 	http.HandleFunc("/ws", handel)
 	go handelChannel()
 	http.ListenAndServe(":3000", nil)
 }
 
-func te() (int ,error) {
-	return 12, errors.New("err")
+func FileHandle(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:TokenName,
+		Value:strconv.Itoa(int(time.Now().Unix())),
+	}
+	http.SetCookie(w, &cookie)
+	http.ServeFile(w, r, "public/sk.html")
 }
 
 func handel(w http.ResponseWriter, r *http.Request) {
-	token, err := r.Cookie("token")
+	token, err := r.Cookie(TokenName)
 	if err != nil {
 		fmt.Println("token不存在: ", err)
 		return
@@ -109,6 +118,6 @@ func (c *client) writeMes(message *[]byte) {
 	// 		c.conn.WriteMessage(1, message)
 	// 	}
 	// }
-	err := c.conn.WriteMessage(-1, *message)
+	err := c.conn.WriteMessage(1, *message)
 	fmt.Println("---119---", err)
 }
