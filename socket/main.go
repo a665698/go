@@ -57,6 +57,7 @@ func handel(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("用户不存在,创建")
 		// clientItem = &client{conn: c, message: make(chan []byte), name: token.Value}
 		clientItem = &client{conn: c, name: token.Value}
+		addMessage <- []byte("有一个用户加入")
 		addUser <- clientItem
 	} else {
 		fmt.Println("用户存在")
@@ -103,6 +104,7 @@ func (c *client) readMes() {
 				fmt.Println("--96--close")
 				// close(c.message)
 				delete(clients, c.name)
+				addMessage <- []byte("有一个用户退出")
 			}
 			break
 		}
