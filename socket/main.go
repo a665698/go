@@ -1,4 +1,4 @@
-package main
+package socket
 
 import (
 	"fmt"
@@ -35,23 +35,23 @@ var accounts = []Account{
 	{5, "admin5", "555555"},
 	}
 
-func main() {
+func Main() {
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 	http.HandleFunc("/", indexHandle)
 	http.HandleFunc("/ws", wsHandel)
 	http.HandleFunc("/login", loginHandel)
-	go socketInit()
+	go SocketInit()
 	http.ListenAndServe(":3000", nil)
 }
 
 func loginHandel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, string(GetHttpResult(2)), http.StatusBadRequest)
+		w.Write(GetHttpResult(2))
 		return
 	}
-
 	user := r.PostFormValue("user")
 	password := r.PostFormValue("password")
+	fmt.Println(user)
 	for _, v := range accounts {
 		if v.user == user && v.password == password {
 			cookie := http.Cookie{
@@ -99,7 +99,7 @@ func wsHandel(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func socketInit() {
+func SocketInit() {
 	clients = make(map[string]*client)
 	addUser = make(chan *client)
 	addMessage = make(chan []byte, 10)

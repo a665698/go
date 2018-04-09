@@ -1,4 +1,4 @@
-package main
+package socket
 
 import "encoding/json"
 
@@ -9,16 +9,16 @@ var HttpResultArr = map[int]string{
 }
 
 type HttpResult struct {
-	id int
-	info string
+	Status int `json:"status"`
+	Info string `json:"info"`
 }
 
 func GetHttpResult(k int) []byte {
-	info := HttpResult{id: k}
+	info := HttpResult{Status: k}
 	if v, ok := HttpResultArr[k]; ok {
-		info.info = v
+		info.Info = v
 	} else {
-		info.info = "未知错误"
+		info.Info = "未知错误"
 	}
 	str, err := json.Marshal(info)
 	if err != nil {
