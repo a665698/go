@@ -66,7 +66,6 @@ func (mw *MyWindow) AddNotifyIcon() {
 		mw.Dispose()
 		walk.App().Exit(0)
 	})
-
 }
 
 func (mw *MyWindow) addMenu(name string) *walk.Menu {
