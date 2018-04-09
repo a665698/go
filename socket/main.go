@@ -14,7 +14,6 @@ const TokenName = "CzcyAutoLogin"
 
 type client struct {
 	conn *websocket.Conn
-	// message chan []byte
 	name string
 }
 
