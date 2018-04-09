@@ -157,7 +157,6 @@ func (n *novel) parseContentHtml() {
 	fileName = strings.TrimSuffix(fileName, ".html")
 	content, _ := n.document.Find("#content").Html()
 	ioutil.WriteFile(fileName+".txt", []byte(content), 0666)
-
 	fmt.Println(n.novelName)
 	channel <- 1
 }
