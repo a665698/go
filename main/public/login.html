@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/public/layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="/public/css/login.css"  media="all">
+</head>
+<body>
+    <div class="layui-bg-black layui-bg-main">
+        <div class="layui-main">
+            <form class="layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="user" lay-verify="user" autocomplete="off" placeholder="请输入用户名" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密&nbsp;&nbsp;&nbsp;&nbsp;码：</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="demo1">登录</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/public/layui/layui.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        layui.use(['form', 'jquery', 'layer'], function(){
+            var form = layui.form, jquery = layui.jquery, layer = layui.layer;
+            //自定义验证规则
+            form.verify({
+                user: function(value){
+                    if(value.length < 5){
+                        return '标题至少得5个字符啊';
+                    }
+                },
+                password: [/(.+){6,12}$/, '密码必须6到12位']
+            });
+            //监听提交
+            form.on('submit(demo1)', function(data){
+                jquery.post("/login", data.field).done(function (response) {
+                    console.log(response);
+                }).fail(function (response) {
+                    let info = response.responseText ? response.responseText : '未知错误';
+                    layer.msg(info, {icon: 2});
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>
