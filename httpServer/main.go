@@ -52,6 +52,7 @@ func Open(response http.ResponseWriter, request *http.Request) {
 	//	http.NotFound(response, request)
 	//	return
 	//}
+
 	http.ServeFile(response,request,ResourceFile + request.URL.Path)
 }
 
