@@ -21,17 +21,52 @@ var clients map[string]*client
 var addUser chan *client
 var addMessage chan []byte
 
+type Account struct {
+	id int
+	user string
+	password string
+}
+
+var accounts = []Account{
+	{1, "admin1", "111111"},
+	{2, "admin2", "222222"},
+	{3, "admin3", "333333"},
+	{4, "admin4", "444444"},
+	{5, "admin5", "555555"},
+	}
+
 func main() {
-	fmt.Println("start")
-	//fs := http.FileServer(http.Dir("public"))
-	//http.Handle("/", fs)
-	http.HandleFunc("/", FileHandle)
-	http.HandleFunc("/ws", handel)
-	go handelChannel()
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+	http.HandleFunc("/", indexHandle)
+	http.HandleFunc("/ws", wsHandel)
+	http.HandleFunc("/login", loginHandel)
+	go socketInit()
 	http.ListenAndServe(":3000", nil)
 }
 
-func FileHandle(w http.ResponseWriter, r *http.Request) {
+func loginHandel(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, string(GetHttpResult(2)), http.StatusBadRequest)
+		return
+	}
+
+	user := r.PostFormValue("user")
+	password := r.PostFormValue("password")
+	for _, v := range accounts {
+		if v.user == user && v.password == password {
+			cookie := http.Cookie{
+				Name:TokenName,
+				Value:strconv.Itoa(int(time.Now().Unix())),
+			}
+			http.SetCookie(w, &cookie)
+			w.Write(GetHttpResult(0))
+			return
+		}
+	}
+	w.Write(GetHttpResult(1))
+}
+
+func indexHandle(w http.ResponseWriter, r *http.Request) {
 	cookie := http.Cookie{
 		Name:TokenName,
 		Value:strconv.Itoa(int(time.Now().Unix())),
@@ -40,7 +75,7 @@ func FileHandle(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "public/sk.html")
 }
 
-func handel(w http.ResponseWriter, r *http.Request) {
+func wsHandel(w http.ResponseWriter, r *http.Request) {
 	token, err := r.Cookie(TokenName)
 	if err != nil {
 		fmt.Println("token不存在: ", err)
@@ -58,36 +93,24 @@ func handel(w http.ResponseWriter, r *http.Request) {
 		clientItem = &client{conn: c, name: token.Value}
 		addMessage <- []byte("有一个用户加入")
 		addUser <- clientItem
+		clientItem.readMes()
 	} else {
-		fmt.Println("用户存在")
-		clientItem = val
+		val.readMes()
 	}
-
-	// client := &client{conn: c, message: make(chan []byte), name: token.Value}
-	fmt.Println("--61--", len(clients))
-	// go clientItem.writeMes()
-	go clientItem.readMes()
 }
 
-func handelChannel() {
+func socketInit() {
 	clients = make(map[string]*client)
 	addUser = make(chan *client)
 	addMessage = make(chan []byte, 10)
+	go handelChannel()
+}
+
+func handelChannel() {
 	for {
 		select {
 		case message := <-addMessage:
-			for _, client := range clients {
-				// select {
-				// case client.message <- message:
-				// default:
-				// 	fmt.Println("--79--close")
-				// 	close(client.message)
-				// 	delete(clients, client.name)
-				// }
-				// client.conn.WriteMessage(1, message)
-
-				client.writeMes(&message)
-			}
+			writeMes(&message)
 		case user := <-addUser:
 			clients[user.name] = user
 		}
@@ -112,13 +135,9 @@ func (c *client) readMes() {
 	}
 }
 
-func (c *client) writeMes(message *[]byte) {
-	// for {
-	// 	select {
-	// 	case message := <-c.message:
-	// 		c.conn.WriteMessage(1, message)
-	// 	}
-	// }
-	err := c.conn.WriteMessage(1, *message)
-	fmt.Println("---119---", err)
+func writeMes(message *[]byte) {
+	for _, client := range clients {
+		err := client.conn.WriteMessage(1, *message)
+		fmt.Println("---119---", err)
+	}
 }
