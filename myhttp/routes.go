@@ -6,6 +6,7 @@ func (r *Router) WxRoutes() {
 		r.Post("/", WxHandle)
 		r.Get("/")
 	}, WxBaseFunc)
+
 	go GetAccessToken()
 }
 
