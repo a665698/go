@@ -158,6 +158,7 @@ var errCode = map[int]string{
 
 // 获取错误信息
 func GetError(code int) string {
+
 	if errInfo, ok := errCode[code]; !ok {
 		return "未知的返回码 :" + string(code)
 	} else {
