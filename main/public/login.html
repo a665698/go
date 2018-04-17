@@ -2,12 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>layui</title>
+    <title>login</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/public/layui/css/layui.css"  media="all">
     <link rel="stylesheet" href="/public/css/login.css"  media="all">
+    <link rel="icon" href="/public/favicon.ico" />
 </head>
 <body>
     <div class="layui-bg-black layui-bg-main">
@@ -42,18 +43,23 @@
             form.verify({
                 user: function(value){
                     if(value.length < 5){
-                        return '标题至少得5个字符啊';
+                        return '用户名至少得5个字符啊';
                     }
                 },
-                password: [/(.+){6,12}$/, '密码必须6到12位']
+                password: [/(.+){6,12}$/, '密码至少6位']
             });
             //监听提交
             form.on('submit(demo1)', function(data){
                 jquery.post("/login", data.field).done(function (response) {
-                    console.log(response);
-                }).fail(function (response) {
-                    let info = response.responseText ? response.responseText : '未知错误';
-                    layer.msg(info, {icon: 2});
+                    console.log(response.status);
+                    if (response.status == 0) {
+                        location.href = '/';
+                    } else {
+                        let info = response.info ? response.info : '未知错误';
+                        layer.msg(info, {icon: 5});
+                    }
+                }).fail(function () {
+                    layer.msg('链接错误', {icon: 2});
                 });
                 return false;
             });

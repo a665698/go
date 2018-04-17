@@ -6,20 +6,12 @@ import (
 	"net/http"
 	"time"
 	"strconv"
+	"crypto/md5"
 )
 
 var upgrader = websocket.Upgrader{}
 
-const TokenName = "CzcyAutoLogin"
-
-type client struct {
-	conn *websocket.Conn
-	name string
-}
-
-var clients map[string]*client
-var addUser chan *client
-var addMessage chan []byte
+const TokenName = "token"
 
 type Account struct {
 	id int
@@ -40,39 +32,47 @@ func Main() {
 	http.HandleFunc("/", indexHandle)
 	http.HandleFunc("/ws", wsHandel)
 	http.HandleFunc("/login", loginHandel)
-	go SocketInit()
 	http.ListenAndServe(":3000", nil)
 }
 
 func loginHandel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.Write(GetHttpResult(2))
+		AjaxReturn(w, 2)
 		return
 	}
 	user := r.PostFormValue("user")
 	password := r.PostFormValue("password")
-	fmt.Println(user)
 	for _, v := range accounts {
 		if v.user == user && v.password == password {
+			random := strconv.Itoa(int(time.Now().Unix()))
+			salt := md5.New()
+			salt.Write([]byte(random))
+			readyRandom := fmt.Sprintf("%x", salt.Sum(nil))
+			UserAdd(readyRandom, user)
 			cookie := http.Cookie{
 				Name:TokenName,
-				Value:strconv.Itoa(int(time.Now().Unix())),
+				Value:readyRandom,
 			}
 			http.SetCookie(w, &cookie)
-			w.Write(GetHttpResult(0))
+			AjaxReturn(w, 0)
 			return
 		}
 	}
-	w.Write(GetHttpResult(1))
+	AjaxReturn(w, 1)
 }
 
 func indexHandle(w http.ResponseWriter, r *http.Request) {
-	cookie := http.Cookie{
-		Name:TokenName,
-		Value:strconv.Itoa(int(time.Now().Unix())),
+	token, err := r.Cookie(TokenName)
+	if err != nil {
+		http.Redirect(w, r, "/public/login.html", http.StatusFound)
+		return
 	}
-	http.SetCookie(w, &cookie)
-	http.ServeFile(w, r, "public/sk.html")
+	if _, err := GetUser(token.Value); err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/public/login.html", http.StatusFound)
+	} else {
+		http.ServeFile(w, r, "public/index.html")
+	}
 }
 
 func wsHandel(w http.ResponseWriter, r *http.Request) {
@@ -86,58 +86,17 @@ func wsHandel(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("upgrader错误: ", err)
 		return
 	}
-	var clientItem *client
-	if val, ok := clients[token.Value]; !ok {
-		fmt.Println("用户不存在,创建")
-		// clientItem = &client{conn: c, message: make(chan []byte), name: token.Value}
-		clientItem = &client{conn: c, name: token.Value}
-		addMessage <- []byte("有一个用户加入")
-		addUser <- clientItem
-		clientItem.readMes()
+	if val, err := GetUser(token.Value); err != nil {
+		fmt.Println(err)
 	} else {
+		if val.conn == nil {
+			val.conn = c
+		}
 		val.readMes()
 	}
 }
 
-func SocketInit() {
-	clients = make(map[string]*client)
-	addUser = make(chan *client)
-	addMessage = make(chan []byte, 10)
-	go handelChannel()
-}
-
-func handelChannel() {
-	for {
-		select {
-		case message := <-addMessage:
-			writeMes(&message)
-		case user := <-addUser:
-			clients[user.name] = user
-		}
-	}
-}
-
-func (c *client) readMes() {
-	for {
-		mt, message, err := c.conn.ReadMessage()
-		if err != nil {
-			fmt.Println("消息获取失败: ", err, "\n消息类型", mt)
-			if mt == -1 {
-				fmt.Println("--96--close")
-				// close(c.message)
-				delete(clients, c.name)
-				addMessage <- []byte("有一个用户退出")
-			}
-			break
-		}
-		fmt.Println("收到消息: ", string(message), " \n消息类型: ", mt)
-		addMessage <- message
-	}
-}
-
-func writeMes(message *[]byte) {
-	for _, client := range clients {
-		err := client.conn.WriteMessage(1, *message)
-		fmt.Println("---119---", err)
-	}
+func UserAdd(flag, name string) {
+	sendSysMessage(name + " 加入")
+	NewUser(flag, name)
 }
