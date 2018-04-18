@@ -51,8 +51,8 @@
             //监听提交
             form.on('submit(demo1)', function(data){
                 jquery.post("/login", data.field).done(function (response) {
-                    console.log(response.status);
                     if (response.status == 0) {
+                        window.localStorage.setItem("name", data.field.user);
                         location.href = '/';
                     } else {
                         let info = response.info ? response.info : '未知错误';

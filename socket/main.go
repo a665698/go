@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"time"
-	"strconv"
 	"crypto/md5"
 )
 
@@ -44,9 +42,8 @@ func loginHandel(w http.ResponseWriter, r *http.Request) {
 	password := r.PostFormValue("password")
 	for _, v := range accounts {
 		if v.user == user && v.password == password {
-			random := strconv.Itoa(int(time.Now().Unix()))
 			salt := md5.New()
-			salt.Write([]byte(random))
+			salt.Write([]byte(user))
 			readyRandom := fmt.Sprintf("%x", salt.Sum(nil))
 			UserAdd(readyRandom, user)
 			cookie := http.Cookie{

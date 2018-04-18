@@ -18,7 +18,9 @@ type Message struct {
 	Status int `json:"status"`
 	Info string `json:"info"`
 	Url string `json:"url,omitempty"`
-	Name string `json:"name,omitempty"`
+	Name string `json:"name,omitempty"` // 用户名
+	Type int `json:"type,omitempty"` // 信息类型(1：群聊 2：私聊 3：群聊总数)
+	GroupId int `json:"group_id.omitempty"` // 组名
 }
 
 // 返回ajax信息 w：http返回包 status：信息KEY
