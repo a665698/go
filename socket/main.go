@@ -64,8 +64,8 @@ func indexHandle(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 		return
 	}
-	if _, err := GetUser(token.Value); err != nil {
-		fmt.Println(err)
+	if  clients.getUser(token.Value) == nil {
+		fmt.Println("用户不存在")
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 	} else {
 		http.ServeFile(w, r, "public/index.html")
@@ -83,8 +83,8 @@ func wsHandel(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("upgrader错误: ", err)
 		return
 	}
-	if val, err := GetUser(token.Value); err != nil {
-		fmt.Println(err)
+	if val := clients.getUser(token.Value); val == nil {
+		fmt.Println("用户不存在")
 	} else {
 		if val.conn == nil {
 			val.conn = c

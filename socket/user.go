@@ -2,8 +2,8 @@ package socket
 
 import (
 	"github.com/gorilla/websocket"
-	"errors"
 	"fmt"
+	"sync"
 )
 
 type client struct {
@@ -12,49 +12,50 @@ type client struct {
 	flag string
 }
 
-var clients = make(map[string]*client)
-var addUser = make(chan *client)
-var delUser = make(chan *client)
+var clients = Clients{client: make(map[string]*client)}
 
-func init() {
-	go channelUser()
+type Clients struct {
+	client map[string]*client
+	mux sync.Mutex
 }
 
-// 获取所有用户
-func GetClients() map[string]*client {
-	return clients
+func (c *Clients) get() map[string]*client {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	return c.client
 }
 
-// 获取用户
-func GetUser(key string) (*client, error) {
-	if val, ok := clients[key]; !ok {
-		return nil, errors.New("用户不存在")
+func (c *Clients) getUser (key string) *client {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	if v, ok := c.client[key]; ok {
+		return v
 	} else {
-		return val, nil
+		return nil
 	}
+}
+
+func (c *Clients) addUser(u *client) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	c.client[u.flag] = u
+}
+
+func (c *Clients) delUser(u *client) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	delete(c.client, u.flag)
 }
 
 // 新建用户
 func NewUser(flag, name string) {
 	user := &client{name: name, flag: flag}
-	addUser <- user
+	clients.addUser(user)
 }
 
 // 用户退出
 func (c *client) QuitUser() {
-	delUser <- c
-}
-
-// 用户通道,添加和删除用户
-func channelUser() {
-	for {
-		select {
-		case user := <- addUser:
-			clients[user.flag] = user
-		case user := <- delUser:
-			delete(clients, user.flag)
-		}
-	}
+	clients.delUser(c)
 }
 
 // 读取用户发送的消息

@@ -62,7 +62,7 @@ func NewMessage(status int, info string) Message {
 func sendSysMessage(info string) {
 	m := Message{Status: -2, Info: info}
 	mes, _ := json.Marshal(m)
-	for _, client := range GetClients() {
+	for _, client := range clients.get() {
 		err := client.conn.WriteMessage(1, mes)
 		if err != nil {
 			fmt.Println("---发送系统消息错误---", err)
@@ -75,7 +75,7 @@ func sendTextMessage(info, name string) {
 	m := NewMessage(0, info)
 	m.Name = name
 	mes, _ := json.Marshal(m)
-	for _, client := range GetClients() {
+	for _, client := range clients.get() {
 		err := client.conn.WriteMessage(1, mes)
 		if err != nil {
 			fmt.Println("---发送文本消息错误---", err)
