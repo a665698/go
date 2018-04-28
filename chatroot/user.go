@@ -81,7 +81,7 @@ func (c *Client) delUser() {
 
 // 新建用户
 func NewUser(account Account) *Client {
-	go sendSysMessage(account.name + " 加入")
+	go sendGroupMessage(account.name + " 加入", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
 	client := &Client{Account: account}
 	return client
 }
@@ -90,6 +90,15 @@ func NewUser(account Account) *Client {
 func getAccount(id int) (Account, error) {
 	for _, val := range Accounts {
 		if val.id == id {
+			return val, nil
+		}
+	}
+	return Account{}, errors.New("用户不存在")
+}
+
+func getAccountByName(name string) (Account, error) {
+	for _, val := range Accounts {
+		if val.name == name {
 			return val, nil
 		}
 	}
@@ -108,7 +117,8 @@ func (c *Client) readMes() {
 		if err != nil {
 			if mt == -1 {
 				c.delUser()
-				go sendSysMessage(c.name + " 退出")
+				go sendGroupMessage(c.name + " 退出", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
+				//go sendGroupMessage(c.name + " 退出")
 			}
 			fmt.Println("消息获取失败: ", err, "\n消息类型", mt)
 			break
@@ -138,9 +148,14 @@ func (c *Client) MessageHandle(m []byte) {
 
 // 发送私聊信息
 func (c *Client) sendPrivateMessageHandle (message Message, client *Client)  {
+	message.Name = c.name
+	message.Id = c.id
 	m, _ := json.Marshal(message)
 	c.conn.WriteMessage(1, m)
 	if client != nil {
+		message.Name = client.name
+		message.Id = client.id
+		m, _ := json.Marshal(message)
 		client.conn.WriteMessage(1, m)
 	}
 }
@@ -151,14 +166,13 @@ func (c *Client) PrivateMessageHandle (ws Message)  {
 		message := NewMessage(-2, "消息发送失败:对方已下线")
 		c.sendPrivateMessageHandle(message, nil)
 	} else {
-		message := NewMessage(0, ws.Info)
-		c.sendPrivateMessageHandle(message, client)
+		c.sendPrivateMessageHandle(ws, client)
 	}
 }
 
 // 群聊信息处理
 func (c *Client) GroupMessageHandle (m Message) {
-	if m.Id == 0 {
-		sendTextMessage(m.Info, c.name)
+	if m.Id == PublicGroupId {
+		sendGroupMessage(m.Info, c.name, OkMessageStatusCode, GroupMessageTypeCode, getAllClient())
 	}
 }
