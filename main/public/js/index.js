@@ -20,6 +20,7 @@ chatRoot.prototype.init = function () {
     self.name = window.localStorage.getItem('name');
     self.roomContent = $('#roomContent');
     self.sendButton = $('#send');
+    self.roomTable = $('#roomTable');
     self.sendButton.click(function () {
         self.sendMessage();
     });
@@ -40,22 +41,40 @@ chatRoot.prototype.init = function () {
 };
 
 chatRoot.prototype.takeMessage = function (data) {
-    let c = this.name === data.name ? 'myself' : '';
     let current = this.roomContent.children('.current');
-    current.append(`<div class="chatroom-log ${c}">
-        <span class="avatar"><img src="https://avatars0.githubusercontent.com/u/30884897?s=40&v=4" alt="${data.name}"></span>
-        <span class="time"><b data-id="Q-2xC-3e2q46">${data.name}</b> 2018/4/16 下午5:51:30</span>
-        <span class="detail">${data.info}</span>
-     </div>`);
+    let text = '';
+    if (data.status === 0) {
+        text = this.takeTextMessage(data);
+    } else if(data.status === -2) {
+        text = this.takeSysMessage(data);
+    }
+    current.append(text);
     let scrollTop = current[0].scrollHeight;
     this.roomContent.scrollTop(scrollTop);
+};
+
+chatRoot.prototype.takeTextMessage = function (data) {
+    let c = this.name === data.name ? 'myself' : '';
+    return `<div class="chatroom-log ${c}">
+        <span class="avatar"><img src="https://avatars0.githubusercontent.com/u/30884897?s=40&v=4" alt="${data.name}"></span>
+        <span class="time"><b data-id="Q-2xC-3e2q46">${data.name}</b>  ${new Date().toLocaleString()}</span>
+        <span class="detail">${data.info}</span>
+     </div>`
+};
+
+chatRoot.prototype.takeSysMessage = function (data) {
+    return `<div class="chatroom-log system_log">
+        <span><b>${data.info}</b>  ${new Date().toLocaleString()}</span>
+     </div>`
 };
 
 chatRoot.prototype.sendMessage = function () {
     let t = this.sendButton.prev('textarea');
     let val = t.val();
     t.val('');
-    this.ws.send(val)
+    let table = this.roomTable.children('.current');
+    let info = {type: table.data('type'), id: table.data('id'), info: val};
+    this.ws.send(JSON.stringify(info))
 };
 
 

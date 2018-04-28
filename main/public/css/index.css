@@ -149,6 +149,11 @@ body {
     overflow: hidden;
     line-height: 18px;
 }
+.chatroom .system_log {
+    text-align: center;
+    display: block;
+    color: #999;
+}
 .chatroom-log .avatar {
     width: 30px;
     height: 30px;
@@ -168,11 +173,11 @@ body {
     float: left;
     color: #999;
 }
-.chatroom-log .time b {
+.chatroom-log:not(.myself) .time b {
     text-decoration: underline;
     font-weight: normal;
 }
-.chatroom-log .time b:hover {
+.chatroom-log:not(.myself) .time b:hover {
     cursor: pointer;
     color: #666;
 }

@@ -1,4 +1,4 @@
-package socket
+package chatroot
 
 import (
 	"fmt"
@@ -10,20 +10,6 @@ import (
 var upgrader = websocket.Upgrader{}
 
 const TokenName = "token"
-
-type Account struct {
-	id int
-	user string
-	password string
-}
-
-var accounts = []Account{
-	{1, "admin1", "111111"},
-	{2, "admin2", "222222"},
-	{3, "admin3", "333333"},
-	{4, "admin4", "444444"},
-	{5, "admin5", "555555"},
-	}
 
 func Main() {
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
@@ -40,12 +26,12 @@ func loginHandel(w http.ResponseWriter, r *http.Request) {
 	}
 	user := r.PostFormValue("user")
 	password := r.PostFormValue("password")
-	for _, v := range accounts {
+	for _, v := range Accounts {
 		if v.user == user && v.password == password {
 			salt := md5.New()
 			salt.Write([]byte(user))
 			readyRandom := fmt.Sprintf("%x", salt.Sum(nil))
-			UserAdd(readyRandom, user)
+			MyCookies.Set(readyRandom, v.id)
 			cookie := http.Cookie{
 				Name:TokenName,
 				Value:readyRandom,
@@ -64,8 +50,8 @@ func indexHandle(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 		return
 	}
-	if  clients.getUser(token.Value) == nil {
-		fmt.Println("用户不存在")
+	if  MyCookies.Get(token.Value) == 0 {
+		fmt.Println("用户未登录1")
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 	} else {
 		http.ServeFile(w, r, "public/index.html")
@@ -76,24 +62,30 @@ func wsHandel(w http.ResponseWriter, r *http.Request) {
 	token, err := r.Cookie(TokenName)
 	if err != nil {
 		fmt.Println("token不存在: ", err)
+		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 		return
 	}
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println("upgrader错误: ", err)
-		return
-	}
-	if val := clients.getUser(token.Value); val == nil {
-		fmt.Println("用户不存在")
+	if  id := MyCookies.Get(token.Value); id == 0 {
+		fmt.Println("用户未登录2")
+		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 	} else {
-		if val.conn == nil {
-			val.conn = c
+		var client *Client
+		if client = getClient(id); client == nil {
+			if account, err := getAccount(id); err != nil {
+				fmt.Println(err)
+				return
+			} else {
+				c, err := upgrader.Upgrade(w, r, nil)
+				if err != nil {
+					fmt.Println("upgrader错误: ", err)
+					return
+				}
+				account.SetCookie(token.Value)
+				client = NewUser(account)
+				client.conn = c
+				client.addUser()
+			}
 		}
-		val.readMes()
+		client.readMes()
 	}
-}
-
-func UserAdd(flag, name string) {
-	sendSysMessage(name + " 加入")
-	NewUser(flag, name)
 }

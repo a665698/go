@@ -1,7 +1,7 @@
 package main
 
-import "socket"
+import "chatroot"
 
 func main() {
-	socket.Main()
+	chatroot.Main()
 }

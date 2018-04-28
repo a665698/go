@@ -1,4 +1,4 @@
-package socket
+package chatroot
 
 import (
 	"encoding/json"
@@ -14,14 +14,16 @@ var HttpResultArr = map[int]interface{}{
 	2: "链接错误",
 }
 
-type Message struct {
-	Status int `json:"status"`
-	Info string `json:"info"`
-	Url string `json:"url,omitempty"`
-	Name string `json:"name,omitempty"` // 用户名
-	Type int `json:"type,omitempty"` // 信息类型(1：群聊 2：私聊 3：群聊总数)
-	GroupId int `json:"group_id.omitempty"` // 组名
-}
+type (
+	Message struct {
+		Status int `json:"status"` // HttpResultArr
+		Info string `json:"info"` // 信息
+		Url string `json:"url,omitempty"`
+		Name string `json:"name,omitempty"` // 用户名
+		Type int `json:"type,omitempty"` // 信息类型(1：群聊 2：私聊 3：群聊总数)
+		Id int `json:"id,omitempty"` // id
+	}
+)
 
 // 返回ajax信息 w：http返回包 status：信息KEY
 func AjaxReturn(w http.ResponseWriter, status int){
@@ -32,6 +34,11 @@ func AjaxReturn(w http.ResponseWriter, status int){
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Write(str)
+}
+
+// 返回空消息
+func NewNullMessage() Message {
+	return Message{}
 }
 
 // 新建消息 status：消息KEY info：发送的信息(当信息为空时,从消息数组中获取信息)
@@ -62,7 +69,7 @@ func NewMessage(status int, info string) Message {
 func sendSysMessage(info string) {
 	m := Message{Status: -2, Info: info}
 	mes, _ := json.Marshal(m)
-	for _, client := range clients.get() {
+	for _, client := range getAllClient() {
 		err := client.conn.WriteMessage(1, mes)
 		if err != nil {
 			fmt.Println("---发送系统消息错误---", err)
@@ -75,7 +82,7 @@ func sendTextMessage(info, name string) {
 	m := NewMessage(0, info)
 	m.Name = name
 	mes, _ := json.Marshal(m)
-	for _, client := range clients.get() {
+	for _, client := range getAllClient() {
 		err := client.conn.WriteMessage(1, mes)
 		if err != nil {
 			fmt.Println("---发送文本消息错误---", err)
