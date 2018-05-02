@@ -118,12 +118,11 @@ func (c *Client) readMes() {
 			if mt == -1 {
 				c.delUser()
 				go sendGroupMessage(c.name + " 退出", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
-				//go sendGroupMessage(c.name + " 退出")
+			} else {
+				fmt.Println("消息获取失败: ", err, "\n消息类型", mt)
 			}
-			fmt.Println("消息获取失败: ", err, "\n消息类型", mt)
 			break
 		}
-		fmt.Println("收到消息: ", string(message), " \n消息类型: ", mt)
 		go c.MessageHandle(message)
 	}
 }
@@ -135,7 +134,7 @@ func (c *Client) MessageHandle(m []byte) {
 	if err != nil {
 		fmt.Println(err)
 		message := NewMessage(-2, "消息发送失败")
-		c.sendPrivateMessageHandle(message, nil)
+		PutMessageQueue(c, message)
 		return
 	}
 	switch ms.Type {
@@ -149,22 +148,17 @@ func (c *Client) MessageHandle(m []byte) {
 // 发送私聊信息
 func (c *Client) sendPrivateMessageHandle (message Message, client *Client)  {
 	message.Name = c.name
+	message.Id = client.id
+	PutMessageQueue(c, message)
+
 	message.Id = c.id
-	m, _ := json.Marshal(message)
-	c.conn.WriteMessage(1, m)
-	if client != nil {
-		message.Name = client.name
-		message.Id = client.id
-		m, _ := json.Marshal(message)
-		client.conn.WriteMessage(1, m)
-	}
+	PutMessageQueue(client,message)
 }
 
 // 私聊信息处理
 func (c *Client) PrivateMessageHandle (ws Message)  {
 	if client := getClient(ws.Id); client == nil {
-		message := NewMessage(-2, "消息发送失败:对方已下线")
-		c.sendPrivateMessageHandle(message, nil)
+		fmt.Println("消息发送失败:对方已下线")
 	} else {
 		c.sendPrivateMessageHandle(ws, client)
 	}

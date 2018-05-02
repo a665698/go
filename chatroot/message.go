@@ -2,6 +2,7 @@ package chatroot
 
 import (
 	"encoding/json"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"fmt"
 )
@@ -85,12 +86,15 @@ func sendGroupMessage(info, name string, status int, t int, client map[int]*Clie
 	m.Name = name
 	m.Id = PublicGroupId
 	m.Info = info
-	mes, _ := json.Marshal(m)
 	for _, client := range client {
-		err := client.conn.WriteMessage(1, mes)
-		if err != nil {
-			fmt.Println("---发送消息错误---", err)
-		}
+		PutMessageQueue(client, m)
+	}
+}
+
+func sendMessage(message Message, conn *websocket.Conn) {
+	err := conn.WriteJSON(message)
+	if err != nil {
+		fmt.Println("--消息发送错误--", err)
 	}
 }
 

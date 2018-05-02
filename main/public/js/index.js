@@ -34,12 +34,6 @@ chatRoot.prototype.init = function () {
     let ws = new WebSocket("ws://" + document.location.host + "/ws");
     ws.onopen = function () {};
     ws.onmessage = function (evt) {
-        console.log(evt);
-        // var node = document.getElementById('content');
-        // var p = document.createElement('p');
-        // p.innerHTML = evt.data;
-        // node.appendChild(p);
-        // node.scrollTop = node.scrollHeight - node.offsetHeight;
         self.takeMessage(JSON.parse(evt.data))
     };
     ws.onclose = function (evt) {};
@@ -48,7 +42,6 @@ chatRoot.prototype.init = function () {
 };
 
 chatRoot.prototype.takeMessage = function (data) {
-
     let text = '';
     if (data.status === 0) {
         text = this.takeTextMessage(data);
@@ -59,14 +52,22 @@ chatRoot.prototype.takeMessage = function (data) {
     let current = $('#group-' + idName);
     if (current.length  === 0) {
         this.addWindow(data.type,data.id,data.name);
+        current = $('#group-' + idName);
     }
     let group = $('#table-' + idName + ".current");
     if (group.length === 0) {
+        group = $('#table-' + idName);
         let count = group.find('.count');
-        count.text(count.text() +1);
+        let n = parseInt(count.text()) +1;
+        if (n > 99) {
+            count.text("99+");
+        } else {
+            count.text(n);
+        }
+        count.css('visibility', 'visible');
     }
     current.append(text);
-    let scrollTop = current.scrollHeight;
+    let scrollTop = current[0].scrollHeight;
     this.roomContent.scrollTop(scrollTop);
 };
 
@@ -129,6 +130,8 @@ chatRoot.prototype.checkTab = function (self) {
     let id = self.data('id');
     let type = self.data('type');
     this.roomTable.find('.current').removeClass('current');
+    self.find('.count').text('0');
+    self.find('.count').css('visibility', 'hidden');
     self.addClass('current');
     this.roomContent.find('.current').removeClass('current');
     $('#group-' + type + '-' + id).addClass('current');
