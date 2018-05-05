@@ -1,45 +1,45 @@
-package chatroot
+package chatroom
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"fmt"
 )
 
 var HttpResultArr = map[int]interface{}{
 	-2: "系统通知",
 	-1: []string{"您未登录,请先登录", "/public/login.html"},
-	0: "成功",
-	1: "用户名密码错误",
-	2: "链接错误",
-	3: "用户不存在",
+	0:  "成功",
+	1:  "用户名密码错误",
+	2:  "链接错误",
+	3:  "用户不存在",
 }
 
 const (
 	PublicGroupId = 1
 
-	SysMessageStatusCode = -2
+	SysMessageStatusCode      = -2
 	NotLoginMessageStatusCode = -1
-	OkMessageStatusCode = 0
+	OkMessageStatusCode       = 0
 
-	GroupMessageTypeCode = 1
+	GroupMessageTypeCode   = 1
 	PrivateMessageTypeCode = 2
 )
 
 type (
 	Message struct {
-		Status int `json:"status"` // HttpResultArr
-		Info string `json:"info"` // 信息
-		Url string `json:"url,omitempty"`
-		Name string `json:"name"` // 用户名
-		Type int `json:"type"` // 信息类型(1：群聊 2：私聊 3：群聊总数)
-		Id int `json:"id"` // id
+		Status int    `json:"status"` // HttpResultArr
+		Info   string `json:"info"`   // 信息
+		Url    string `json:"url,omitempty"`
+		Name   string `json:"name"` // 用户名
+		Type   int    `json:"type"` // 信息类型(1：群聊 2：私聊 3：群聊总数)
+		Id     int    `json:"id"`   // id
 	}
 )
 
 // 返回ajax信息 w：http返回包 status：信息KEY
-func AjaxReturn(w http.ResponseWriter, status int){
+func AjaxReturn(w http.ResponseWriter, status int) {
 	info := NewMessage(status, "")
 	str, err := json.Marshal(info)
 	if err != nil {
@@ -97,4 +97,3 @@ func sendMessage(message Message, conn *websocket.Conn) {
 		fmt.Println("--消息发送错误--", err)
 	}
 }
-

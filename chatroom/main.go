@@ -1,12 +1,12 @@
-package chatroot
+package chatroom
 
 import (
+	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"crypto/md5"
 	"strconv"
-	"encoding/json"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -22,14 +22,14 @@ func Main() {
 	http.ListenAndServe(":3000", nil)
 }
 
-func getUcInfo(w http.ResponseWriter, r *http.Request)  {
+func getUcInfo(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	name := r.FormValue("name")
 	if name == "" {
 		AjaxReturn(w, 3)
 		return
 	}
-	account ,err := getAccountByName(name)
+	account, err := getAccountByName(name)
 	if err != nil {
 		AjaxReturn(w, 3)
 		return
@@ -54,8 +54,8 @@ func loginHandel(w http.ResponseWriter, r *http.Request) {
 			readyRandom := fmt.Sprintf("%x", salt.Sum(nil))
 			MyCookies.Set(readyRandom, v.id)
 			cookie := http.Cookie{
-				Name:TokenName,
-				Value:readyRandom,
+				Name:  TokenName,
+				Value: readyRandom,
 			}
 			http.SetCookie(w, &cookie)
 			AjaxReturn(w, 0)
@@ -71,7 +71,7 @@ func indexHandle(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 		return
 	}
-	if  MyCookies.Get(token.Value) == 0 {
+	if MyCookies.Get(token.Value) == 0 {
 		fmt.Println("用户未登录1")
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 	} else {
@@ -86,7 +86,7 @@ func wsHandel(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 		return
 	}
-	if  id := MyCookies.Get(token.Value); id == 0 {
+	if id := MyCookies.Get(token.Value); id == 0 {
 		fmt.Println("用户未登录2")
 		http.Redirect(w, r, "/public/login.html", http.StatusFound)
 	} else {
