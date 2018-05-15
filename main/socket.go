@@ -1,7 +1,7 @@
 package main
 
-import "chatroot"
+import "chatroom"
 
 func main() {
-	chatroot.Main()
+	chatroom.Main()
 }

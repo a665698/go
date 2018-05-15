@@ -1,4 +1,4 @@
-package chatroot
+package chatroom
 
 import (
 	"sync"
@@ -20,16 +20,13 @@ func (m *MyCookie) Set(key string, v int) {
 func (m *MyCookie) Get(key string) int {
 	m.RLock()
 	defer m.RUnlock()
-	if val, ok := m.cookie[key]; ok{
+	if val, ok := m.cookie[key]; ok {
 		return val
 	} else {
 		return 0
 	}
 }
 
-func DelCookie(key string)  {
+func DelCookie(key string) {
 	delete(MyCookies.cookie, key)
 }
-
-
-

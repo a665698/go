@@ -1,9 +1,9 @@
-package chatroot
+package chatroom
 
 import (
-	"sync"
 	"errors"
 	"fmt"
+	"sync"
 )
 
 type (
@@ -12,7 +12,7 @@ type (
 		queue []*queue
 	}
 	queue struct {
-		client *Client
+		client  *Client
 		message Message
 	}
 )

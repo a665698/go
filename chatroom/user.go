@@ -1,22 +1,22 @@
-package chatroot
+package chatroom
 
 import (
-	"github.com/gorilla/websocket"
-	"fmt"
-	"sync"
-	"errors"
-	"time"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/gorilla/websocket"
+	"sync"
+	"time"
 )
 
 type (
 	// 用户信息
 	Account struct {
-		id int
-		user string
-		name string
+		id       int
+		user     string
+		name     string
 		password string
-		cookie string
+		cookie   string
 	}
 	// 用户客户端信息
 	Client struct {
@@ -31,11 +31,11 @@ type (
 )
 
 var Accounts = []Account{
-	{id :1, user: "admin1",name: "admin1", password: "111111"},
-	{id :2, user: "admin2",name: "admin2", password: "222222"},
-	{id :3, user: "admin3",name: "admin3", password: "333333"},
-	{id :4, user: "admin4",name: "admin4", password: "444444"},
-	{id :5, user: "admin5",name: "admin5", password: "555555"},
+	{id: 1, user: "admin1", name: "admin1", password: "111111"},
+	{id: 2, user: "admin2", name: "admin2", password: "222222"},
+	{id: 3, user: "admin3", name: "admin3", password: "333333"},
+	{id: 4, user: "admin4", name: "admin4", password: "444444"},
+	{id: 5, user: "admin5", name: "admin5", password: "555555"},
 }
 
 var clients = Clients{client: make(map[int]*Client)}
@@ -48,7 +48,7 @@ func getAllClient() map[int]*Client {
 }
 
 // 获取客户端
-func getClient (key int) *Client {
+func getClient(key int) *Client {
 	clients.Lock()
 	defer clients.Unlock()
 	if v, ok := clients.client[key]; ok {
@@ -81,7 +81,7 @@ func (c *Client) delUser() {
 
 // 新建用户
 func NewUser(account Account) *Client {
-	go sendGroupMessage(account.name + " 加入", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
+	go sendGroupMessage(account.name+" 加入", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
 	client := &Client{Account: account}
 	return client
 }
@@ -106,7 +106,7 @@ func getAccountByName(name string) (Account, error) {
 }
 
 // 设置用户的cookie
-func (a *Account) SetCookie(cookie string)  {
+func (a *Account) SetCookie(cookie string) {
 	a.cookie = cookie
 }
 
@@ -117,7 +117,7 @@ func (c *Client) readMes() {
 		if err != nil {
 			if mt == -1 {
 				c.delUser()
-				go sendGroupMessage(c.name + " 退出", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
+				go sendGroupMessage(c.name+" 退出", "", SysMessageStatusCode, GroupMessageTypeCode, getAllClient())
 			} else {
 				fmt.Println("消息获取失败: ", err, "\n消息类型", mt)
 			}
@@ -146,17 +146,17 @@ func (c *Client) MessageHandle(m []byte) {
 }
 
 // 发送私聊信息
-func (c *Client) sendPrivateMessageHandle (message Message, client *Client)  {
+func (c *Client) sendPrivateMessageHandle(message Message, client *Client) {
 	message.Name = c.name
 	message.Id = client.id
 	PutMessageQueue(c, message)
 
 	message.Id = c.id
-	PutMessageQueue(client,message)
+	PutMessageQueue(client, message)
 }
 
 // 私聊信息处理
-func (c *Client) PrivateMessageHandle (ws Message)  {
+func (c *Client) PrivateMessageHandle(ws Message) {
 	if client := getClient(ws.Id); client == nil {
 		fmt.Println("消息发送失败:对方已下线")
 	} else {
@@ -165,7 +165,7 @@ func (c *Client) PrivateMessageHandle (ws Message)  {
 }
 
 // 群聊信息处理
-func (c *Client) GroupMessageHandle (m Message) {
+func (c *Client) GroupMessageHandle(m Message) {
 	if m.Id == PublicGroupId {
 		sendGroupMessage(m.Info, c.name, OkMessageStatusCode, GroupMessageTypeCode, getAllClient())
 	}
