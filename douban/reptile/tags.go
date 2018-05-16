@@ -2,7 +2,6 @@ package reptile
 
 import (
 	"encoding/json"
-	"sync"
 )
 
 type Tags struct {
@@ -25,7 +24,8 @@ func getTags() {
 
 // 处理标签列表
 func (t *Tags) tagsHandle() {
-	for _, v := range t.Tag {
-		go getMovieList(v)
-	}
+	getMovieList(t.Tag[0])
+	//for _, v := range t.Tag {
+	//	go getMovieList(v)
+	//}
 }

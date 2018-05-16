@@ -1,22 +1,25 @@
 package reptile
 
-import "sync"
+import (
+	"douban/model"
+	"sync"
+)
 
 type queue struct {
 	sync.Mutex
-	movie []*Movie
+	movie []*model.Movie
 }
 
-func New() *queue {
+func NewMovieQueue() *queue {
 	return &queue{
-		movie: make([]*Movie, 0),
+		movie: make([]*model.Movie, 0),
 	}
 }
 
-func (q *queue) Put(movie *Movie) {
+func (q *queue) Put(movie ...*model.Movie) {
 	q.Lock()
 	defer q.Unlock()
-	q.movie = append(q.movie, movie)
+	q.movie = append(q.movie, movie...)
 }
 
 func (q *queue) Len() int {
@@ -25,7 +28,7 @@ func (q *queue) Len() int {
 	return len(q.movie)
 }
 
-func (q *queue) Poll() *Movie {
+func (q *queue) Poll() *model.Movie {
 	q.Lock()
 	defer q.Unlock()
 	if len(q.movie) <= 0 {
@@ -36,3 +39,13 @@ func (q *queue) Poll() *Movie {
 	q.movie = q.movie[1:]
 	return movie
 }
+
+func init() {
+	mainMovieQueue = NewMovieQueue()
+}
+
+func GetMainMovieQueue() *queue {
+	return mainMovieQueue
+}
+
+var mainMovieQueue *queue
