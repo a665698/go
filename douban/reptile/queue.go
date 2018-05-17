@@ -44,8 +44,16 @@ func init() {
 	mainMovieQueue = NewMovieQueue()
 }
 
-func GetMainMovieQueue() *queue {
-	return mainMovieQueue
+func MoviePut(movie ...*model.Movie) {
+	mainMovieQueue.Put(movie...)
+}
+
+func MovieLen() int {
+	return mainMovieQueue.Len()
+}
+
+func MoviePoll() *model.Movie {
+	return mainMovieQueue.Poll()
 }
 
 var mainMovieQueue *queue
