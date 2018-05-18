@@ -17,26 +17,27 @@ func NewMovieList() *MovieList {
 
 // 获取movie列表
 func getMovieList(tag string) {
-	noticeLog("start tag:" + tag)
+	NoticeLog("start tag:" + tag)
 	body, err := getHttp(MOVIE_LIST + tag)
 	if err != nil {
-		noticeLog(err)
+		NoticeLog(err)
 		return
 	}
 	movie := NewMovieList()
 	err = json.Unmarshal(body, &movie)
 	if err != nil {
-		noticeLog(err)
+		NoticeLog(err)
 		return
 	}
 	MoviePut(movie.Movies...)
-	noticeLog("over tag:" + tag)
+	NoticeLog("over tag:" + tag)
 }
 
+//
 func movieListHandle() {
 	currentMovie, err := model.GetAllMovie()
 	if err != nil {
-		noticeLog(err)
+		NoticeLog(err)
 		return
 	}
 	var isAdd bool
@@ -48,9 +49,9 @@ func movieListHandle() {
 			if len(addMovie) > 0 {
 				row, err := model.AddMovie(addMovie)
 				if err != nil {
-					noticeLog(err)
+					NoticeLog(err)
 				} else {
-					noticeLog("add row:" + strconv.FormatInt(row, 10))
+					NoticeLog("add row:" + strconv.FormatInt(row, 10))
 				}
 				addMovie = nil
 				addMovie = make([]*model.Movie, 0)
@@ -65,7 +66,7 @@ func movieListHandle() {
 			}
 		}
 		if isAdd {
-			noticeLog("add movie title:" + movie.Title)
+			NoticeLog("add movie title:" + movie.Title)
 			addMovie = append(addMovie, movie)
 			*currentMovie = append(*currentMovie, *movie)
 		}

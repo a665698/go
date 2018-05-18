@@ -19,20 +19,20 @@ func tickTags() {
 
 // 获取标签列表
 func getTags() {
-	noticeLog("start get tags")
+	NoticeLog("start get tags")
 	body, err := getHttp(TAGS_URL)
 	if err != nil {
-		noticeLog(err)
+		NoticeLog(err)
 		return
 	}
 	tags := Tags{}
 	err = json.Unmarshal(body, &tags)
 	if err != nil {
-		noticeLog(err)
+		NoticeLog(err)
 		return
 	}
 	tags.tagsHandle()
-	noticeLog("over tags")
+	NoticeLog("over tags")
 }
 
 // 处理标签列表

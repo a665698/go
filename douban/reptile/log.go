@@ -11,6 +11,6 @@ func init() {
 	myLog = log.New(os.Stdout, "", log.LstdFlags)
 }
 
-func noticeLog(err interface{}) {
+func NoticeLog(err interface{}) {
 	myLog.Println(err)
 }
