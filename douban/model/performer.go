@@ -8,21 +8,22 @@ type Performer struct {
 	CreateTime int64 `xorm:"created"`
 }
 
-var performers Performers
-
-type Performers struct {
-	performer *[]Performer
-	sync.Mutex
-}
-
+// 初始化
 func NewPerformer() *Performer {
 	return &Performer{}
 }
 
+// 添加演员记录
 func (p *Performer) Insert() (int64, error) {
-	return engine.Insert(p)
+	id, err := engine.Insert(p)
+	if err != nil {
+		return 0, err
+	}
+	performers.performer[p.Name] = id
+	return id, nil
 }
 
+// 获取所有演员列表
 func GetAllPerformer() (*[]Performer, error) {
 	performers := make([]Performer, 0)
 	err := engine.Find(&performers)
@@ -32,29 +33,38 @@ func GetAllPerformer() (*[]Performer, error) {
 	return &performers, nil
 }
 
+type Performers struct {
+	performer map[string]int64
+	sync.Mutex
+}
+
+var performers *Performers
+
+func init() {
+	performers = &Performers{
+		performer: make(map[string]int64),
+	}
+}
+
+// 获取演员ID，不存在时添加
 func GetPerformerId(name string) (int64, error) {
 	performers.Lock()
 	defer performers.Unlock()
-	if performers.performer == nil {
-		var err error
-		performers.performer, err = GetAllPerformer()
+	if len(performers.performer) == 0 {
+		ps, err := GetAllPerformer()
 		if err != nil {
 			return 0, err
 		}
-	}
-	var performer Performer
-	for _, performer = range *performers.performer {
-		if performer.Name == name {
-			return performer.Id, nil
+		for _, p := range *ps {
+			performers.performer[p.Name] = p.Id
+			if p.Name == name {
+			}
 		}
 	}
-	performer.Id = 0
-	performer.Name = name
-	id, err := performer.Insert()
-	if err != nil {
-		return 0, err
+	if id, ok := performers.performer[name]; ok {
+		return id, nil
 	}
-	performer.Id = id
-	*performers.performer = append(*performers.performer, performer)
-	return id, nil
+	var performer Performer
+	performer.Name = name
+	return performer.Insert()
 }

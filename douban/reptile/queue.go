@@ -1,34 +1,37 @@
 package reptile
 
 import (
-	"douban/model"
 	"sync"
+	"time"
 )
 
 type queue struct {
 	sync.Mutex
-	movie []*model.Movie
+	movie []*MovieInfo
 }
 
 func NewMovieQueue() *queue {
 	return &queue{
-		movie: make([]*model.Movie, 0),
+		movie: make([]*MovieInfo, 0),
 	}
 }
 
-func (q *queue) Put(movie ...*model.Movie) {
+// 加入队列
+func (q *queue) Put(movie ...*MovieInfo) {
 	q.Lock()
 	defer q.Unlock()
 	q.movie = append(q.movie, movie...)
 }
 
+// 队列长度
 func (q *queue) Len() int {
 	q.Lock()
 	defer q.Unlock()
 	return len(q.movie)
 }
 
-func (q *queue) Poll() *model.Movie {
+// 从队列顶部获取一条记录并删除
+func (q *queue) Poll() *MovieInfo {
 	q.Lock()
 	defer q.Unlock()
 	if len(q.movie) <= 0 {
@@ -44,7 +47,8 @@ func init() {
 	mainMovieQueue = NewMovieQueue()
 }
 
-func MoviePut(movie ...*model.Movie) {
+// 添加队列
+func MoviePut(movie ...*MovieInfo) {
 	mainMovieQueue.Put(movie...)
 }
 
@@ -52,8 +56,15 @@ func MovieLen() int {
 	return mainMovieQueue.Len()
 }
 
-func MoviePoll() *model.Movie {
-	return mainMovieQueue.Poll()
+// 从队列顶部获取一条记录并删除
+func MoviePoll() *MovieInfo {
+	for {
+		m := mainMovieQueue.Poll()
+		if m != nil {
+			return m
+		}
+		time.Sleep(time.Second)
+	}
 }
 
 var mainMovieQueue *queue

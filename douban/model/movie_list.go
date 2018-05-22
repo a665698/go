@@ -1,7 +1,5 @@
 package model
 
-import "fmt"
-
 type Movie struct {
 	Id         int64  `json:"-"`
 	MovieId    int64  `json:"id,string"`
@@ -18,13 +16,13 @@ func NewMovieList() *Movie {
 func GetAllMovie() (*[]Movie, error) {
 	movies := make([]Movie, 0)
 	err := engine.Find(&movies)
-	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
 	return &movies, nil
 }
 
+// 批量添加
 func AddMovie(m []*Movie) (int64, error) {
 	return engine.Insert(&m)
 }
