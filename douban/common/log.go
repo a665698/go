@@ -3,6 +3,7 @@ package common
 import (
 	"log"
 	"os"
+	"runtime"
 )
 
 var myLog *log.Logger
@@ -12,5 +13,10 @@ func init() {
 }
 
 func NoticeLog(err interface{}) {
-	myLog.Println(err)
+	_, file, line, ok := runtime.Caller(1)
+	if ok {
+		myLog.Println(file, line, err)
+	} else {
+		myLog.Println(err)
+	}
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-var redisDb redis.Pool
+var redisDb *redis.Pool
 
 const (
 	MaxIdle       = 5
@@ -16,7 +16,7 @@ const (
 )
 
 func init() {
-	redisDb = redis.Pool{
+	redisDb = &redis.Pool{
 		MaxIdle:   MaxIdle,
 		MaxActive: MaxActive,
 		Dial: func() (redis.Conn, error) {
@@ -28,6 +28,12 @@ func init() {
 			return c, nil
 		},
 	}
+	rs := redisDb.Get()
+	_, err := rs.Do("ping")
+	if err != nil {
+		panic(err)
+	}
+	rs.Close()
 }
 
 // 添加处理完的movie_id
@@ -49,6 +55,14 @@ func AddMovieInfo(info []byte) (int, error) {
 	rs := redisDb.Get()
 	defer rs.Close()
 	return redis.Int(rs.Do("lpush", MovieInfoList, info))
+}
+
+// 获取一条movie详情并删除
+func GetMovieInfo() ([]byte, error) {
+	rs := redisDb.Get()
+	defer rs.Close()
+	//return redis.Bytes(rs.Do("LPOP", MovieInfoList))
+	return redis.Bytes(rs.Do("lindex", "movie_list_2", 0))
 }
 
 // 添加ip到代理池中

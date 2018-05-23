@@ -25,3 +25,7 @@ func TestGetMovieInfo(t *testing.T) {
 	movie.Cover = "http://www.aaa.com"
 	movieInfoHandle(dom, movie)
 }
+
+func TestMovieInfoHandle(t *testing.T) {
+	MovieInfoHandle()
+}

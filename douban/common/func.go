@@ -4,7 +4,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
+	"unicode"
 )
 
 // 发送GET返回body
@@ -49,4 +51,14 @@ func GetHttpRes(tUrl, proxyIp string) (*http.Response, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+// 删除字符串中的空白字符
+func SpaceMap(str string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, str)
 }
