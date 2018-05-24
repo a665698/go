@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type MovieList struct {
@@ -435,7 +436,23 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 		m.Summary = m.Summary[fIndex+len(str):]
 	}
 	m.Summary = strings.TrimSuffix(m.Summary, "©豆瓣")
-	m.Summary = common.SpaceMap(m.Summary)
+	arr := []rune(m.Summary)
+	var currentArr []rune
+	var isDel bool
+	for _, v := range arr {
+		if unicode.IsSpace(v) {
+			if !isDel {
+				currentArr = append(currentArr, v)
+			}
+			continue
+		}
+		currentArr = append(currentArr, v)
+		isDel = true
+		if (v >= 65 && v <= 106) || (v >= 113 && v <= 122) {
+			isDel = false
+		}
+	}
+	m.Summary = string(currentArr)
 	_, err := model.NewSummary(id, m.Summary).Insert()
 	if err != nil {
 		common.NoticeLog(err)

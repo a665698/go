@@ -9,7 +9,7 @@ import (
 )
 
 func TestGetMovieInfo(t *testing.T) {
-	res, err := common.GetHttpRes("https://movie.douban.com/subject/27018285/", "")
+	res, err := common.GetHttpRes("https://movie.douban.com/subject/1866354/", "")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -36,4 +36,11 @@ func TestMovieInfo_RuntimeHandle(t *testing.T) {
 	movie := NewMovieInfo()
 	json.Unmarshal(info, movie)
 	movie.RuntimeHandle(1545646)
+}
+
+func TestMovieInfo_SummaryHandle(t *testing.T) {
+	info, _ := common.GetMovieInfo()
+	movie := NewMovieInfo()
+	json.Unmarshal(info, movie)
+	movie.SummaryHandle(1545646)
 }
