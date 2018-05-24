@@ -2,6 +2,7 @@ package reptile
 
 import (
 	"douban/common"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"testing"
@@ -28,4 +29,11 @@ func TestGetMovieInfo(t *testing.T) {
 
 func TestMovieInfoHandle(t *testing.T) {
 	MovieInfoHandle()
+}
+
+func TestMovieInfo_RuntimeHandle(t *testing.T) {
+	info, _ := common.GetMovieInfo()
+	movie := NewMovieInfo()
+	json.Unmarshal(info, movie)
+	movie.RuntimeHandle(1545646)
 }

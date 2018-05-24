@@ -364,7 +364,15 @@ func (m *MovieInfo) ReleaseDateHandle(id int64) {
 
 // movie runtime处理
 func (m *MovieInfo) RuntimeHandle(id int64) {
-	s := strings.Split(m.Runtime, "/")
+	s := strings.Split(m.Runtime, " /")
+	for k := range s {
+		str := strings.Split(s[k], "/")
+		in := strings.IndexRune(s[k], '(')
+		s[k] = str[0] + ")"
+		for i := 1; i < len(str); i++ {
+			s = append(s, str[k][:in]+"("+str[i])
+		}
+	}
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v == "" {
@@ -393,11 +401,11 @@ func (m *MovieInfo) RuntimeHandle(id int64) {
 		}
 		reg, _ := regexp.Compile("^[0-9]+")
 		str := reg.FindStringSubmatch(v)
-		var time int
+		var t int
 		if len(str) > 0 {
-			time, _ = strconv.Atoi(str[0])
+			t, _ = strconv.Atoi(str[0])
 		}
-		_, err = model.NewRuntime(time, districtId, id).Insert()
+		_, err = model.NewRuntime(t, districtId, id).Insert()
 		if err != nil {
 			common.NoticeLog(err)
 		}
