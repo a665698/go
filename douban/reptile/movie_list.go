@@ -159,7 +159,8 @@ func MovieInfoHandle() {
 		info, err := common.GetMovieInfo()
 		if err != nil {
 			common.NoticeLog(err)
-			time.Sleep(time.Second * 10)
+			return
+			//time.Sleep(time.Second * 10)
 		}
 		movie := NewMovieInfo()
 		err = json.Unmarshal(info, movie)
@@ -177,6 +178,7 @@ func MovieInfoHandle() {
 		}
 		m := model.NewMovie()
 		m.Title, m.MovieId, m.Rate, m.Cover = movie.Title, movie.MovieId, movie.Rate, movie.Cover
+		m.Star1, m.Star2, m.Star3, m.Star4, m.Star5 = movie.Star1, movie.Star2, movie.Star3, movie.Star4, movie.Star5
 		_, err = m.Insert()
 		if err != nil {
 			common.NoticeLog(err)
@@ -191,7 +193,6 @@ func MovieInfoHandle() {
 		movie.RuntimeHandle(m.Id)
 		movie.AliasHandle(m.Id)
 		movie.SummaryHandle(m.Id)
-		return
 	}
 }
 
@@ -227,6 +228,12 @@ func (m *MovieInfo) DirectedHandle(id int64, b uint8) {
 		if b == 1 && performer.Type != 1 {
 			performer.Type = 1
 			performer.Update()
+		}
+		if b == 0 {
+			i := strings.Index(m.Directed, v)
+			if i >= 0 {
+				continue
+			}
 		}
 		_, err = model.NewMoviePerformer(id, performer.Id).Insert()
 		if err != nil {
@@ -338,10 +345,10 @@ func (m *MovieInfo) ReleaseDateHandle(id int64) {
 		releaseDate := model.NewReleaseDate()
 		releaseDate.MovieId = id
 		if fIndex > 0 {
-			releaseDate.Remark = v[fIndex:]
+			replacer := strings.NewReplacer("(", "", ")", "")
+			releaseDate.Remark = replacer.Replace(v[fIndex:])
 			v = v[:fIndex]
 		}
-
 		var t time.Time
 		if _, err := strconv.Atoi(v); err != nil {
 			t, _ = time.ParseInLocation("2006-01-02", v, tl)
@@ -365,9 +372,10 @@ func (m *MovieInfo) RuntimeHandle(id int64) {
 		}
 		fIndex := strings.IndexRune(v, '(')
 		var districtId int64
+		var err error
 		if fIndex > 0 {
 			districtName := v[fIndex+1 : len(v)-1]
-			districtId, err := model.GetDistrictIdByName(districtName)
+			districtId, err = model.GetDistrictIdByName(districtName)
 			if err != nil {
 				common.NoticeLog(err)
 				continue
@@ -389,7 +397,7 @@ func (m *MovieInfo) RuntimeHandle(id int64) {
 		if len(str) > 0 {
 			time, _ = strconv.Atoi(str[0])
 		}
-		_, err := model.NewRuntime(time, districtId).Insert()
+		_, err = model.NewRuntime(time, districtId, id).Insert()
 		if err != nil {
 			common.NoticeLog(err)
 		}

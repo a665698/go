@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 100125
 File Encoding         : 65001
 
-Date: 2018-05-23 17:20:42
+Date: 2018-05-24 10:54:16
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS `lnn_alias`;
 CREATE TABLE `lnn_alias` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `movie_id` int(10) unsigned NOT NULL,
-  `name` varchar(20) NOT NULL,
+  `name` varchar(40) NOT NULL,
   `create_time` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -54,6 +54,25 @@ CREATE TABLE `lnn_language` (
 -- ----------------------------
 DROP TABLE IF EXISTS `lnn_movie`;
 CREATE TABLE `lnn_movie` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `movie_id` int(10) unsigned NOT NULL COMMENT 'movie id',
+  `rate` float unsigned NOT NULL COMMENT '评分',
+  `title` varchar(100) NOT NULL COMMENT '名称',
+  `cover` varchar(200) NOT NULL COMMENT '封面图片',
+  `star5` varchar(10) NOT NULL,
+  `star4` varchar(10) NOT NULL,
+  `star3` varchar(10) NOT NULL,
+  `star2` varchar(10) NOT NULL,
+  `star1` varchar(10) NOT NULL,
+  `create_time` int(10) unsigned NOT NULL COMMENT '添加时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for lnn_movie_2
+-- ----------------------------
+DROP TABLE IF EXISTS `lnn_movie_2`;
+CREATE TABLE `lnn_movie_2` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `movie_id` int(10) unsigned NOT NULL COMMENT 'movie id',
   `rate` float unsigned NOT NULL COMMENT '评分',
@@ -130,7 +149,7 @@ DROP TABLE IF EXISTS `lnn_release_date`;
 CREATE TABLE `lnn_release_date` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `movie_id` int(10) unsigned NOT NULL,
-  `time` int(10) unsigned NOT NULL,
+  `time` int(10) NOT NULL,
   `remark` varchar(20) NOT NULL,
   `create_time` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
@@ -142,6 +161,7 @@ CREATE TABLE `lnn_release_date` (
 DROP TABLE IF EXISTS `lnn_runtime`;
 CREATE TABLE `lnn_runtime` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `movie_id` int(10) unsigned NOT NULL,
   `district_id` int(10) unsigned NOT NULL,
   `time` smallint(5) unsigned NOT NULL,
   `create_time` int(10) unsigned NOT NULL,

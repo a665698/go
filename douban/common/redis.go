@@ -29,11 +29,11 @@ func init() {
 		},
 	}
 	rs := redisDb.Get()
+	defer rs.Close()
 	_, err := rs.Do("ping")
 	if err != nil {
 		panic(err)
 	}
-	rs.Close()
 }
 
 // 添加处理完的movie_id
@@ -61,8 +61,7 @@ func AddMovieInfo(info []byte) (int, error) {
 func GetMovieInfo() ([]byte, error) {
 	rs := redisDb.Get()
 	defer rs.Close()
-	//return redis.Bytes(rs.Do("LPOP", MovieInfoList))
-	return redis.Bytes(rs.Do("lindex", "movie_list_2", 0))
+	return redis.Bytes(rs.Do("LPOP", MovieInfoList))
 }
 
 // 添加ip到代理池中

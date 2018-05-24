@@ -67,8 +67,8 @@ func writePerformers() error {
 			return err
 		}
 		performers.performer = make(map[string]*Performer)
-		for _, p := range *ps {
-			performers.performer[p.Name] = &p
+		for k := range *ps {
+			performers.performer[(*ps)[k].Name] = &(*ps)[k]
 		}
 	}
 	return nil

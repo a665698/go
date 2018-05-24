@@ -10,6 +10,11 @@ type Movie struct {
 	Title      string
 	Rate       string
 	Cover      string
+	Star5      string
+	Star4      string
+	Star3      string
+	Star2      string
+	Star1      string
 	CreateTime int64 `xorm:"created"`
 }
 

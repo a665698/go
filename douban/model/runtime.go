@@ -4,13 +4,15 @@ type Runtime struct {
 	Id         int64
 	Time       int
 	DistrictId int64
-	CreateTime int64 `xrom:"created"`
+	MovieId    int64
+	CreateTime int64 `xorm:"created"`
 }
 
-func NewRuntime(time int, districtId int64) *Runtime {
+func NewRuntime(time int, districtId, movieId int64) *Runtime {
 	return &Runtime{
 		Time:       time,
 		DistrictId: districtId,
+		MovieId:    movieId,
 	}
 }
 
