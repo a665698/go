@@ -470,9 +470,11 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 			isDel = false
 		}
 	}
-	m.Summary = string(currentArr)
-	_, err := model.NewSummary(id, m.Summary).Insert()
-	if err != nil {
-		common.NoticeLog(err)
+	if len(currentArr) > 0 {
+		m.Summary = string(currentArr)
+		_, err := model.NewSummary(id, m.Summary).Insert()
+		if err != nil {
+			common.NoticeLog(err)
+		}
 	}
 }
