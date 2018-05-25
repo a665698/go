@@ -63,7 +63,7 @@ func MoviePoll() *MovieInfo {
 		if m != nil {
 			return m
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 10)
 	}
 }
 

@@ -67,15 +67,32 @@ func getMovieList(tag string) {
 }
 
 func movieInfo() {
-	for i := 0; i < 5; i++ {
-		go GetMovieInfo()
+	movieInfoChan := make(chan *MovieInfo)
+	go MovieInfoHandle(movieInfoChan)
+	for i := 0; i < 10; i++ {
+		go GetMovieInfo(movieInfoChan)
 	}
 }
 
 // 获取movie详情
-func GetMovieInfo() {
+func GetMovieInfo(movieInfo chan<- *MovieInfo) {
 	for {
 		movie := MoviePoll()
+		// 是否存在待处理Id列表中,存在跳过
+		b, _ := common.IsExistMovieId(movie.MovieId)
+		if b == 1 {
+			continue
+		}
+		// 是否存在已处理完成的列表中,存在跳过
+		mInfo, err := model.GetMovieByMovieId(movie.MovieId)
+		if err != nil {
+			common.NoticeLog(err)
+			continue
+		}
+		if mInfo != nil {
+			continue
+		}
+		// 获取代理IP
 		ip := proxy_pool.GetIp()
 		res, err := common.GetHttpRes(common.MOVIE_INFO+strconv.FormatInt(movie.MovieId, 10), ip)
 		if err != nil {
@@ -96,7 +113,7 @@ func GetMovieInfo() {
 			MoviePut(movie)
 			continue
 		}
-		if !movieInfoHandle(dom, movie) {
+		if !movie.MovieInfoHandle(dom, movieInfo) {
 			common.NoticeLog(fmt.Sprintf("id: %d 页面解析错误", movie.MovieId))
 			MoviePut(movie)
 			continue
@@ -105,11 +122,7 @@ func GetMovieInfo() {
 }
 
 // 详情页面解析
-func movieInfoHandle(d *goquery.Document, movie *MovieInfo) bool {
-	b, _ := common.IsExistMovieId(movie.MovieId)
-	if b == 1 {
-		return true
-	}
+func (m *MovieInfo) MovieInfoHandle(d *goquery.Document, movieInfo chan<- *MovieInfo) bool {
 	info := d.Find("#info")
 	if info.Length() == 0 {
 		return false
@@ -121,54 +134,56 @@ func movieInfoHandle(d *goquery.Document, movie *MovieInfo) bool {
 		if len(v) == 2 {
 			switch strings.TrimSpace(v[0]) {
 			case "导演":
-				movie.Directed = v[1]
+				m.Directed = v[1]
 			case "编剧":
-				movie.Celebrity = v[1]
+				m.Celebrity = v[1]
 			case "类型":
-				movie.Type = v[1]
+				m.Type = v[1]
 			case "制片国家/地区":
-				movie.District = v[1]
+				m.District = v[1]
 			case "语言":
-				movie.Language = v[1]
+				m.Language = v[1]
 			case "上映日期":
-				movie.ReleaseDate = v[1]
+				m.ReleaseDate = v[1]
 			case "片长":
-				movie.Runtime = v[1]
+				m.Runtime = v[1]
 			case "又名":
-				movie.Alias = v[1]
+				m.Alias = v[1]
 			}
 		}
 	}
-	movie.Summary = strings.TrimSpace(d.Find("#link-report").Text())
+	m.Summary = strings.TrimSpace(d.Find("#link-report").Text())
 	star := d.Find(".ratings-on-weight .rating_per")
 	if star.Length() == 5 {
-		movie.Star5 = star.Eq(0).Text()
-		movie.Star4 = star.Eq(1).Text()
-		movie.Star3 = star.Eq(2).Text()
-		movie.Star2 = star.Eq(3).Text()
-		movie.Star1 = star.Eq(4).Text()
+		m.Star5 = star.Eq(0).Text()
+		m.Star4 = star.Eq(1).Text()
+		m.Star3 = star.Eq(2).Text()
+		m.Star2 = star.Eq(3).Text()
+		m.Star1 = star.Eq(4).Text()
 	}
-	movieBytes, _ := json.Marshal(movie)
-	common.AddMovieInfo(movieBytes)
-	common.AddMovieId(movie.MovieId)
-	common.NoticeLog(movie.Title + ":处理完成")
+	//movieBytes, _ := json.Marshal(m)
+	//common.AddMovieInfo(movieBytes)
+	movieInfo <- m
+	common.AddMovieId(m.MovieId)
+	common.NoticeLog(m.Title + ":处理完成")
 	return true
 }
 
-func MovieInfoHandle() {
+func MovieInfoHandle(movieInfo <-chan *MovieInfo) {
 	for {
-		info, err := common.GetMovieInfo()
-		if err != nil {
-			common.NoticeLog(err)
-			return
-			//time.Sleep(time.Second * 10)
-		}
-		movie := NewMovieInfo()
-		err = json.Unmarshal(info, movie)
-		if err != nil {
-			common.NoticeLog(err)
-			continue
-		}
+		//info, err := common.GetMovieInfo()
+		//if err != nil {
+		//	common.NoticeLog(err)
+		//	return
+		//	//time.Sleep(time.Second * 10)
+		//}
+		//movie := NewMovieInfo()
+		//err = json.Unmarshal(info, movie)
+		//if err != nil {
+		//	common.NoticeLog(err)
+		//	continue
+		//}
+		movie := <-movieInfo
 		mInfo, err := model.GetMovieByMovieId(movie.MovieId)
 		if err != nil {
 			common.NoticeLog(err)
@@ -438,7 +453,7 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 	m.Summary = strings.TrimSuffix(m.Summary, "©豆瓣")
 	arr := []rune(m.Summary)
 	var currentArr []rune
-	var isDel bool
+	isDel := true
 	for _, v := range arr {
 		if unicode.IsSpace(v) {
 			if !isDel {
