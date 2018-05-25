@@ -26,6 +26,10 @@ func (m *Movie) Insert() (int64, error) {
 	return engine.InsertOne(m)
 }
 
+func (m *Movie) Del() (int64, error) {
+	return engine.Delete(m)
+}
+
 func GetAllMovie() (*[]Movie, error) {
 	movies := make([]Movie, 0)
 	err := engine.Find(&movies)
@@ -61,4 +65,13 @@ func GetMovieByMovieId(movieId int64) (*Movie, error) {
 	} else {
 		return nil, nil
 	}
+}
+
+func GetRepeat() (*[]Movie, error) {
+	movies := make([]Movie, 0)
+	err := engine.Select("COUNT(id) as cid,id").GroupBy("movie_id").Having("cid >1").Find(&movies)
+	if err != nil {
+		return nil, err
+	}
+	return &movies, nil
 }

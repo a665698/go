@@ -15,3 +15,7 @@ func TestMovieInfo_SummaryHandle(t *testing.T) {
 	movieInfo.SummaryHandle(12131)
 	fmt.Println(movieInfo.Summary)
 }
+
+func TestDelRepeatMovie(t *testing.T) {
+	DelRepeatMovie()
+}

@@ -83,6 +83,7 @@ func GetMovieInfo(movieInfo chan<- *MovieInfo) {
 		if b == 1 {
 			continue
 		}
+		common.AddMovieId(movie.MovieId)
 		// 是否存在已处理完成的列表中,存在跳过
 		mInfo, err := model.GetMovieByMovieId(movie.MovieId)
 		if err != nil {
@@ -164,7 +165,6 @@ func (m *MovieInfo) MovieInfoHandle(d *goquery.Document, movieInfo chan<- *Movie
 	//movieBytes, _ := json.Marshal(m)
 	//common.AddMovieInfo(movieBytes)
 	movieInfo <- m
-	common.AddMovieId(m.MovieId)
 	common.NoticeLog(m.Title + ":处理完成")
 	return true
 }
@@ -469,5 +469,25 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 		if err != nil {
 			common.NoticeLog(err)
 		}
+	}
+}
+
+// 删除重复数据
+func DelRepeatMovie() {
+	ms, err := model.GetRepeat()
+	if err != nil {
+		common.NoticeLog(err)
+		return
+	}
+	for _, v := range *ms {
+		v.Del()
+		model.DelMovieDistrictByMovieId(v.Id)
+		model.DelMovieLanguageByMovieId(v.Id)
+		model.DelMoviePerformerByMovieId(v.Id)
+		model.DelMovieTypeByMovieId(v.Id)
+		model.DelReleaseDateByMovieId(v.Id)
+		model.DelRuntimeByMovieId(v.Id)
+		model.DelSummaryByMovieId(v.Id)
+		model.DelAliasByMovieId(v.Id)
 	}
 }

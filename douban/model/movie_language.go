@@ -17,3 +17,13 @@ func NewMovieLanguage(movieId, languageId int64) *MovieLanguage {
 func (ml *MovieLanguage) Insert() (int64, error) {
 	return engine.InsertOne(ml)
 }
+
+func (ml *MovieLanguage) Del() (int64, error) {
+	return engine.Delete(ml)
+}
+
+func DelMovieLanguageByMovieId(id int64) (int64, error) {
+	ml := new(MovieLanguage)
+	ml.MovieId = id
+	return ml.Del()
+}

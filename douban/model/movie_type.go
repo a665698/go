@@ -17,3 +17,13 @@ func NewMovieType(movieId, typeId int64) *MovieType {
 func (my *MovieType) Insert() (int64, error) {
 	return engine.InsertOne(my)
 }
+
+func (my *MovieType) Del() (int64, error) {
+	return engine.Delete(my)
+}
+
+func DelMovieTypeByMovieId(id int64) (int64, error) {
+	mt := new(MovieType)
+	mt.MovieId = id
+	return mt.Del()
+}

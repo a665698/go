@@ -17,3 +17,13 @@ func NewMovieDistrict(movieId, districtId int64) *MovieDistrict {
 func (md *MovieDistrict) Insert() (int64, error) {
 	return engine.InsertOne(md)
 }
+
+func (md *MovieDistrict) Del() (int64, error) {
+	return engine.Delete(md)
+}
+
+func DelMovieDistrictByMovieId(id int64) (int64, error) {
+	md := new(MovieDistrict)
+	md.MovieId = id
+	return md.Del()
+}

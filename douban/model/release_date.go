@@ -15,3 +15,13 @@ func NewReleaseDate() *ReleaseDate {
 func (r *ReleaseDate) Insert() (int64, error) {
 	return engine.InsertOne(r)
 }
+
+func (r *ReleaseDate) Del() (int64, error) {
+	return engine.Delete(r)
+}
+
+func DelReleaseDateByMovieId(id int64) (int64, error) {
+	rd := new(ReleaseDate)
+	rd.MovieId = id
+	return rd.Del()
+}

@@ -17,3 +17,13 @@ func NewMoviePerformer(movieId, performerId int64) *MoviePerformer {
 func (mp *MoviePerformer) Insert() (int64, error) {
 	return engine.InsertOne(mp)
 }
+
+func (mp *MoviePerformer) Del() (int64, error) {
+	return engine.Delete(mp)
+}
+
+func DelMoviePerformerByMovieId(id int64) (int64, error) {
+	mp := new(MoviePerformer)
+	mp.MovieId = id
+	return mp.Del()
+}
