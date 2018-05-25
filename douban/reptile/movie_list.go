@@ -218,9 +218,9 @@ func MovieInfoHandle(movieInfo <-chan *MovieInfo) {
 func (m *MovieInfo) DirectedHandle(id int64, b uint8) {
 	var directed []string
 	if b == 1 {
-		directed = strings.Split(m.Directed, "/")
+		directed = strings.Split(m.Directed, " /")
 	} else {
-		directed = strings.Split(m.Celebrity, "/")
+		directed = strings.Split(m.Celebrity, " /")
 	}
 	for _, v := range directed {
 		v = strings.TrimSpace(v)
@@ -260,7 +260,7 @@ func (m *MovieInfo) DirectedHandle(id int64, b uint8) {
 
 // movie type处理
 func (m *MovieInfo) TypeHandle(id int64) {
-	t := strings.Split(m.Type, "/")
+	t := strings.Split(m.Type, " /")
 	for _, v := range t {
 		v = strings.TrimSpace(v)
 		if v == "" {
@@ -290,7 +290,7 @@ func (m *MovieInfo) TypeHandle(id int64) {
 
 // movie district处理
 func (m *MovieInfo) DistrictHandle(id int64) {
-	s := strings.Split(m.District, "/")
+	s := strings.Split(m.District, " /")
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v == "" {
@@ -320,7 +320,7 @@ func (m *MovieInfo) DistrictHandle(id int64) {
 
 // movie language处理
 func (m *MovieInfo) LanguageHandle(id int64) {
-	s := strings.Split(m.Language, "/")
+	s := strings.Split(m.Language, " /")
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v == "" {
@@ -350,7 +350,7 @@ func (m *MovieInfo) LanguageHandle(id int64) {
 
 // movie release_date处理
 func (m *MovieInfo) ReleaseDateHandle(id int64) {
-	s := strings.Split(m.ReleaseDate, "/")
+	s := strings.Split(m.ReleaseDate, " /")
 	tl, _ := time.LoadLocation("Asia/Shanghai")
 	for _, v := range s {
 		v = strings.TrimSpace(v)
@@ -430,7 +430,7 @@ func (m *MovieInfo) RuntimeHandle(id int64) {
 
 // movie alias 处理
 func (m *MovieInfo) AliasHandle(id int64) {
-	s := strings.Split(m.Alias, "/")
+	s := strings.Split(m.Alias, " /")
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v == "" {
