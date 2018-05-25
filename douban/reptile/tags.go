@@ -13,6 +13,7 @@ type Tags struct {
 func tickTags() {
 	go movieInfo()
 	for {
+		common.DelMovieId()
 		getTags()
 		time.Sleep(time.Hour * 2)
 	}

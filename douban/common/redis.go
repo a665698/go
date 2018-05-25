@@ -50,6 +50,13 @@ func IsExistMovieId(id int64) (int, error) {
 	return redis.Int(rs.Do("sismember", MovieIdList, id))
 }
 
+// 删除movie_id列表
+func DelMovieId() (int, error) {
+	rs := redisDb.Get()
+	defer rs.Close()
+	return redis.Int(rs.Do("DEL", MovieIdList))
+}
+
 // 添加movie详情
 func AddMovieInfo(info []byte) (int, error) {
 	rs := redisDb.Get()
