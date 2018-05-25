@@ -16,7 +16,7 @@ func init() {
 	}
 	mapper := core.NewPrefixMapper(core.SnakeMapper{}, "lnn_")
 	engine.SetTableMapper(mapper)
-	engine.ShowSQL()
+	//engine.ShowSQL()
 	err = engine.Ping()
 	if err != nil {
 		panic(err)
