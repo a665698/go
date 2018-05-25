@@ -450,28 +450,21 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 	if fIndex > 0 {
 		m.Summary = m.Summary[fIndex+len(str):]
 	}
-	m.Summary = strings.TrimSpace(m.Summary)
 	m.Summary = strings.TrimSuffix(m.Summary, "©豆瓣")
 	arr := []rune(m.Summary)
 	var currentArr []rune
-	var isDel, upIsSpace bool
 	for _, v := range arr {
 		if unicode.IsSpace(v) {
-			if !isDel && !upIsSpace {
-				currentArr = append(currentArr, v)
+			if len(currentArr) > 0 && !unicode.IsSpace(currentArr[len(currentArr)-1]) {
+				currentArr = append(currentArr, ' ')
 			}
-			upIsSpace = true
 			continue
 		}
-		upIsSpace = false
 		currentArr = append(currentArr, v)
-		isDel = true
-		if (v >= 65 && v <= 106) || (v >= 113 && v <= 122) {
-			isDel = false
-		}
 	}
 	if len(currentArr) > 0 {
 		m.Summary = string(currentArr)
+		return
 		_, err := model.NewSummary(id, m.Summary).Insert()
 		if err != nil {
 			common.NoticeLog(err)
