@@ -19,3 +19,9 @@ func TestMovieInfo_SummaryHandle(t *testing.T) {
 func TestDelRepeatMovie(t *testing.T) {
 	DelRepeatMovie()
 }
+
+func TestMovieInfo_CoverHandle(t *testing.T) {
+	movieInfo := NewMovieInfo()
+	movieInfo.Cover = "https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2516578307.jpg"
+	movieInfo.CoverHandle(456)
+}

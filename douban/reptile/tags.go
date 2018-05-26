@@ -22,7 +22,7 @@ func tickTags() {
 // 获取标签列表
 func getTags() {
 	common.NoticeLog("start get tags")
-	body, err := common.GetHttp(common.TAGS_URL, "")
+	body, err := common.GetHttp(common.TagsUrl, "")
 	if err != nil {
 		common.NoticeLog(err)
 		return

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,7 +52,7 @@ func NewMovieInfo() *MovieInfo {
 // 获取movie列表,并添加到队列中
 func getMovieList(tag string) {
 	common.NoticeLog("start tag:" + tag)
-	body, err := common.GetHttp(common.MOVIE_LIST+tag, "")
+	body, err := common.GetHttp(common.MovieListUrl+tag, "")
 	if err != nil {
 		common.NoticeLog(err)
 		return
@@ -95,7 +96,7 @@ func GetMovieInfo(movieInfo chan<- *MovieInfo) {
 		}
 		// 获取代理IP
 		ip := proxy_pool.GetIp()
-		res, err := common.GetHttpRes(common.MOVIE_INFO+strconv.FormatInt(movie.MovieId, 10), ip)
+		res, err := common.GetHttpRes(common.MovieInfoUrl+strconv.FormatInt(movie.MovieId, 10), ip)
 		if err != nil {
 			common.NoticeLog(err)
 			MoviePut(movie)
@@ -209,6 +210,7 @@ func MovieInfoHandle(movieInfo <-chan *MovieInfo) {
 		movie.RuntimeHandle(m.Id)
 		movie.AliasHandle(m.Id)
 		movie.SummaryHandle(m.Id)
+		movie.CoverHandle(m.Id)
 	}
 }
 
@@ -469,6 +471,31 @@ func (m *MovieInfo) SummaryHandle(id int64) {
 		if err != nil {
 			common.NoticeLog(err)
 		}
+	}
+}
+
+// movie cover 处理
+func (m *MovieInfo) CoverHandle(id int64) {
+	body, err := common.GetHttp(m.Cover, "")
+	if err != nil {
+		common.NoticeLog(err)
+		return
+	}
+	reg := regexp.MustCompile("\\.[\\w]+$")
+	suffix := reg.FindString(m.Cover)
+	if suffix == "" {
+		common.NoticeLog(m.Cover, "后缀未找到")
+		return
+	}
+	file, err := os.OpenFile(fmt.Sprintf("%s/%d%s", common.ImagePath, id, suffix), os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		common.NoticeLog(err)
+		return
+	}
+	defer file.Close()
+	_, err = file.Write(body)
+	if err != nil {
+		common.NoticeLog(err)
 	}
 }
 
