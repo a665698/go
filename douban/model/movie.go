@@ -67,6 +67,7 @@ func GetMovieByMovieId(movieId int64) (*Movie, error) {
 	}
 }
 
+// 获取重复数据
 func GetRepeat() (*[]Movie, error) {
 	movies := make([]Movie, 0)
 	err := engine.Select("COUNT(id) as cid,id").GroupBy("movie_id").Having("cid >1").Find(&movies)
@@ -74,4 +75,13 @@ func GetRepeat() (*[]Movie, error) {
 		return nil, err
 	}
 	return &movies, nil
+}
+
+func GetList() (*[]Movie, error) {
+	ms := make([]Movie, 0)
+	err := engine.Desc("rate").Find(&ms)
+	if err != nil {
+		return nil, err
+	}
+	return &ms, nil
 }
