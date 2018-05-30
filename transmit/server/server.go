@@ -72,7 +72,10 @@ func CommandHandle(command string) []byte {
 	if err != nil {
 		return []byte(err.Error())
 	}
-	cmd.Start()
+	err = cmd.Start()
+	if err != nil {
+		return []byte(err.Error())
+	}
 	reader := bufio.NewReader(out)
 	var b []byte
 	var buf = make([]byte, 1024)
@@ -87,6 +90,6 @@ func CommandHandle(command string) []byte {
 		b = append(b, buf[:n]...)
 	}
 	cmd.Wait()
-	fmt.Println(string(b))
+	fmt.Println(96, string(b))
 	return b
 }
